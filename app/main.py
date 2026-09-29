@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
@@ -29,7 +30,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Health Check"], summary="Check Microservice Health")
-async def health_check():
+async def health_check() -> Dict[str, Any]:
     return {
         "status": "healthy",
         "service": settings.PROJECT_NAME,
@@ -40,7 +41,7 @@ async def health_check():
 
 
 @app.get("/", tags=["Root"], summary="Microservice Root Overview")
-async def root():
+async def root() -> Dict[str, Any]:
     return {
         "message": f"Welcome to {settings.PROJECT_NAME}",
         "docs_url": "/docs",

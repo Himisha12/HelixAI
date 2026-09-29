@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, Any, Dict
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.config import settings
@@ -74,7 +74,7 @@ async def login_for_access_token(
     "/me",
     summary="Get current user profile and AI usage metrics"
 )
-async def get_me(current_user: Annotated[UserInDB, Depends(get_current_user)]):
+async def get_me(current_user: Annotated[UserInDB, Depends(get_current_user)]) -> Dict[str, Any]:
     metrics = rate_limiter.get_usage_metrics(current_user.username)
     return {
         "user": UserResponse(

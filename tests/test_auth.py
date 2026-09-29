@@ -1,9 +1,10 @@
+from typing import Dict
 import pytest
 from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_health_check(async_client: AsyncClient):
+async def test_health_check(async_client: AsyncClient) -> None:
     response = await async_client.get("/health")
     assert response.status_code == 200
     data = response.json()
@@ -11,7 +12,7 @@ async def test_health_check(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_demo_user_login(async_client: AsyncClient):
+async def test_demo_user_login(async_client: AsyncClient) -> None:
     response = await async_client.post(
         "/api/v1/auth/token",
         data={"username": "demo_user", "password": "demo123"},
@@ -24,7 +25,7 @@ async def test_demo_user_login(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_invalid_login(async_client: AsyncClient):
+async def test_invalid_login(async_client: AsyncClient) -> None:
     response = await async_client.post(
         "/api/v1/auth/token",
         data={"username": "demo_user", "password": "wrongpassword"},
@@ -34,7 +35,7 @@ async def test_invalid_login(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_user_registration(async_client: AsyncClient):
+async def test_user_registration(async_client: AsyncClient) -> None:
     response = await async_client.post(
         "/api/v1/auth/register",
         json={"username": "test_user_new", "email": "newuser@test.com", "password": "password123"},
@@ -46,7 +47,7 @@ async def test_user_registration(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_get_me_profile(async_client: AsyncClient, auth_headers: dict):
+async def test_get_me_profile(async_client: AsyncClient, auth_headers: Dict[str, str]) -> None:
     response = await async_client.get("/api/v1/auth/me", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()

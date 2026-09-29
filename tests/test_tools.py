@@ -1,9 +1,10 @@
+from typing import Dict
 import pytest
 from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_list_tools(async_client: AsyncClient):
+async def test_list_tools(async_client: AsyncClient) -> None:
     response = await async_client.get("/api/v1/tools")
     assert response.status_code == 200
     tools = response.json()
@@ -15,7 +16,7 @@ async def test_list_tools(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_execute_calculator_tool(async_client: AsyncClient, auth_headers: dict):
+async def test_execute_calculator_tool(async_client: AsyncClient, auth_headers: Dict[str, str]) -> None:
     response = await async_client.post(
         "/api/v1/tools/execute",
         headers=auth_headers,
@@ -28,7 +29,7 @@ async def test_execute_calculator_tool(async_client: AsyncClient, auth_headers: 
 
 
 @pytest.mark.asyncio
-async def test_execute_weather_tool(async_client: AsyncClient, auth_headers: dict):
+async def test_execute_weather_tool(async_client: AsyncClient, auth_headers: Dict[str, str]) -> None:
     response = await async_client.post(
         "/api/v1/tools/execute",
         headers=auth_headers,

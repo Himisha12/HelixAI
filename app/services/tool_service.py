@@ -2,7 +2,7 @@ import ast
 import operator
 import sys
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from app.models.tools import (
     ToolDefinition,
     ToolExecutionRequest,
@@ -10,35 +10,38 @@ from app.models.tools import (
     ToolParameter,
 )
 
-# Safe math operators for AST evaluation
-SAFE_OPERATORS = {
+# Binary operators mapping
+BINARY_OPERATORS: Dict[type, Callable[[Any, Any], Any]] = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,
     ast.Mult: operator.mul,
     ast.Div: operator.truediv,
     ast.Pow: operator.pow,
+}
+
+# Unary operators mapping
+UNARY_OPERATORS: Dict[type, Callable[[Any], Any]] = {
     ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
 }
 
 
 def _safe_eval(node: ast.AST) -> Any:
-    if isinstance(node, ast.Num):  # Python < 3.8 back-compat
-        return node.n
-    elif isinstance(node, ast.Constant):  # Python >= 3.8
+    if isinstance(node, ast.Constant):
         return node.value
     elif isinstance(node, ast.BinOp):
         left = _safe_eval(node.left)
         right = _safe_eval(node.right)
-        op_type = type(node.op)
-        if op_type in SAFE_OPERATORS:
-            return SAFE_OPERATORS[op_type](left, right)
-        raise ValueError(f"Unsupported operator: {op_type}")
+        bin_op_type = type(node.op)
+        if bin_op_type in BINARY_OPERATORS:
+            return BINARY_OPERATORS[bin_op_type](left, right)
+        raise ValueError(f"Unsupported binary operator: {bin_op_type}")
     elif isinstance(node, ast.UnaryOp):
         operand = _safe_eval(node.operand)
-        op_type = type(node.op)
-        if op_type in SAFE_OPERATORS:
-            return SAFE_OPERATORS[op_type](operand)
-        raise ValueError(f"Unsupported operator: {op_type}")
+        unary_op_type = type(node.op)
+        if unary_op_type in UNARY_OPERATORS:
+            return UNARY_OPERATORS[unary_op_type](operand)
+        raise ValueError(f"Unsupported unary operator: {unary_op_type}")
     else:
         raise ValueError(f"Unsupported expression element: {type(node)}")
 
@@ -116,7 +119,6 @@ class ToolService:
 
             elif tool_name == "weather_lookup":
                 city = str(args.get("city", "Unknown City")).title()
-                # Mock weather database generator
                 mock_weather = {
                     "city": city,
                     "temperature": "22°C / 71.6°F",

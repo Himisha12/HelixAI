@@ -1,9 +1,10 @@
+from typing import Dict
 import pytest
 from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_chat_completion_unauthorized(async_client: AsyncClient):
+async def test_chat_completion_unauthorized(async_client: AsyncClient) -> None:
     response = await async_client.post(
         "/api/v1/chat/completions",
         json={
@@ -15,7 +16,7 @@ async def test_chat_completion_unauthorized(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_chat_completion_authorized(async_client: AsyncClient, auth_headers: dict):
+async def test_chat_completion_authorized(async_client: AsyncClient, auth_headers: Dict[str, str]) -> None:
     response = await async_client.post(
         "/api/v1/chat/completions",
         headers=auth_headers,
@@ -34,7 +35,7 @@ async def test_chat_completion_authorized(async_client: AsyncClient, auth_header
 
 
 @pytest.mark.asyncio
-async def test_chat_completion_structured_json(async_client: AsyncClient, auth_headers: dict):
+async def test_chat_completion_structured_json(async_client: AsyncClient, auth_headers: Dict[str, str]) -> None:
     response = await async_client.post(
         "/api/v1/chat/completions",
         headers=auth_headers,

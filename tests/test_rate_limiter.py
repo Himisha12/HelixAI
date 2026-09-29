@@ -4,7 +4,7 @@ from app.core.exceptions import RateLimitExceededException
 from app.services.rate_limiter import AIRateLimiter
 
 
-def test_rate_limiter_rpm_exceeded():
+def test_rate_limiter_rpm_exceeded() -> None:
     limiter = AIRateLimiter()
     user_id = "test_rate_user"
 
@@ -18,7 +18,7 @@ def test_rate_limiter_rpm_exceeded():
         limiter.check_rate_limit(user_id, estimated_tokens=10)
 
 
-def test_rate_limiter_tpm_exceeded():
+def test_rate_limiter_tpm_exceeded() -> None:
     limiter = AIRateLimiter()
     user_id = "test_tpm_user"
 
