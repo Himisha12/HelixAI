@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fast_llm_microservice
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - LLM_BACKEND=local_mock
+      - SECRET_KEY=super-secret-production-jwt-key-change-me
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=30
+      - RATE_LIMIT_TOKENS_PER_MINUTE=15000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fast_llm_streamlit_ui
+    command: streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    restart: always
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
