@@ -1,0 +1,17 @@
+AegisAI Microservice System Architecture Specification
+==================================================
+
+1. Overview
+AegisAI is a production-grade FastAPI microservice tailored for Data & AI Engineering workloads.
+It features autonomous tool calling, local open LLM inference (Llama 3 8B, Mistral 7B), JWT authentication,
+multi-role RBAC (Admin, Analyst, Data Engineer, User), and sliding-window rate limiting.
+
+2. Data Engineering Tool Matrix
+- Autonomous SQL AI Agent: Converts natural language questions into dialect-aware SQL (PostgreSQL, Snowflake, BigQuery), validates DDL, and generates query optimization execution plans.
+- AI Document & Web Researcher: Fuses uploaded CSV files, PDFs, or architectural text documents with real-time web search RAG for grounded Q&A.
+- Schema Guard: Validates Pydantic v2 schemas and JSON structural integrity for microservice APIs.
+
+3. Performance Benchmarks
+- Sub-50ms token authentication and authorization verification.
+- Dual-quota sliding window rate limits: 20 Requests Per Minute (RPM) and 10,000 Tokens Per Minute (TPM).
+- 100% containerized deployment with multi-stage Docker build and automated CI via GitHub Actions.

@@ -63,6 +63,28 @@ async def test_execute_sql_data_analyst_tool(
 
 
 @pytest.mark.asyncio
+async def test_execute_sql_deduplication_query(
+    async_client: AsyncClient, auth_headers: Dict[str, str]
+) -> None:
+    response = await async_client.post(
+        "/api/v1/tools/execute",
+        headers=auth_headers,
+        json={
+            "tool_name": "sql_data_analyst_tool",
+            "arguments": {
+                "task": "generate_sql",
+                "query_or_prompt": "write a query to remove duplicates",
+                "dialect": "snowflake"
+            },
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert "QUALIFY" in data["result"]["generated_sql"] or "ROW_NUMBER()" in data["result"]["generated_sql"]
+
+
+@pytest.mark.asyncio
 async def test_execute_data_schema_validator_tool(
     async_client: AsyncClient, auth_headers: Dict[str, str]
 ) -> None:

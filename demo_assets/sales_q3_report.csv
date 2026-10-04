@@ -1,0 +1,9 @@
+transaction_id,customer_name,region,order_date,amount_usd,product_category,status
+TX1001,Apex Tech,North America,2026-09-01,15400.00,Enterprise Cloud,Completed
+TX1002,Vortex Systems,Europe,2026-09-03,8900.50,Analytics Suite,Completed
+TX1003,Nova Financial,Asia-Pacific,2026-09-05,24500.00,Enterprise Cloud,Completed
+TX1004,Apex Tech,North America,2026-09-12,12300.00,Security Shield,Completed
+TX1005,Pulse Retail,North America,2026-09-15,4500.00,Analytics Suite,Pending
+TX1006,Helios Bio,Europe,2026-09-18,31000.00,Enterprise Cloud,Completed
+TX1007,Vortex Systems,Europe,2026-09-22,6700.00,Security Shield,Completed
+TX1008,Soylent Data,Asia-Pacific,2026-09-25,18200.00,Analytics Suite,Completed

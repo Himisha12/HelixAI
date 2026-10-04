@@ -66,9 +66,10 @@ async def run_autonomous_agent(
 
     steps: List[AgentStep] = []
 
-    # 1. AI Document + Web Researcher Workflow
-    if doc_content or request.enable_web_research or "search" in task_lower or "research" in task_lower or "web" in task_lower or "csv" in task_lower or "pdf" in task_lower or "document" in task_lower:
-        payload_to_use = doc_content if doc_content else "id,customer_name,revenue,region\n101,Acme Corp,125000,US-East\n102,Globex,85000,US-West\n103,Soylent,210000,EU-Central"
+    # 1. AI Document + Web Researcher Workflow (Triggered when document is attached or research keywords present)
+    has_research_keyword = any(k in task_lower for k in ["search", "research", "web", "csv", "pdf", "document"])
+    if doc_content or has_research_keyword:
+        payload_to_use = doc_content if doc_content else ""
         exec_res = tool_service.execute_tool(
             ToolExecutionRequest(
                 tool_name="pdf_csv_web_researcher",
@@ -84,7 +85,7 @@ async def run_autonomous_agent(
                 step_number=1,
                 action="AI Document & Web Research",
                 tool_name="pdf_csv_web_researcher",
-                arguments={"document_content": payload_to_use[:100] + "...", "question": task, "web_search": request.enable_web_research},
+                arguments={"document_content": payload_to_use[:100] + "..." if payload_to_use else "None", "question": task, "web_search": request.enable_web_research},
                 output=exec_res.result,
             )
         )

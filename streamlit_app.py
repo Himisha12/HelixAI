@@ -358,7 +358,11 @@ with tab_analyst:
                 resp = requests.post(
                     f"{BASE_URL}/api/v1/agent/run",
                     headers=headers,
-                    json={"task_description": f"{analyst_prompt_in} (Dialect: {dialect_sel})", "model": model_sel},
+                    json={
+                        "task_description": f"{analyst_prompt_in} (Dialect: {dialect_sel})",
+                        "model": model_sel,
+                        "enable_web_research": False
+                    },
                 )
                 if resp.status_code == 200:
                     sdata = resp.json()
@@ -392,7 +396,7 @@ with tab_doc_web:
     st.subheader("📄 AI Document + Web Researcher")
     st.write("Combines uploaded PDFs, CSV datasets, or text documents with live web search research to answer questions using both internal private documents and external public knowledge.")
     
-    uploaded_f = st.file_uploader("Upload Document (CSV, TXT, or PDF Text)", type=["csv", "txt", "log"])
+    uploaded_f = st.file_uploader("Upload Document (CSV, TXT, PDF, or Log)", type=["csv", "txt", "log", "pdf"])
     
     sample_csv_default = (
         "id,customer_name,revenue,region,orders_count\n"
@@ -406,7 +410,7 @@ with tab_doc_web:
     doc_text = ""
     if uploaded_f is not None:
         try:
-            doc_text = uploaded_f.getvalue().decode("utf-8")
+            doc_text = uploaded_f.getvalue().decode("utf-8", errors="ignore")
             st.success(f"Uploaded file '{uploaded_f.name}' ({len(doc_text)} bytes) loaded!")
         except Exception as e:
             st.error(f"File reading error: {e}")

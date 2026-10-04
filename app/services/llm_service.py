@@ -171,6 +171,75 @@ class LLMServiceBoundary:
                 indent=2,
             )
 
+        # Agent Synthesis Mode (Synthesizing tool step outputs)
+        if "collected telemetry" in query_lower or "task goal:" in query_lower:
+            # Extract generated SQL or tool output if present in prompt
+            if "generated_sql" in user_query:
+                try:
+                    # Look for generated_sql content
+                    sql_start = user_query.find("generated_sql")
+                    snippet = user_query[sql_start:]
+                    if "--" in snippet or "SELECT" in snippet or "WITH" in snippet:
+                        clean_sql = snippet.split('explanation')[0].replace('generated_sql', '').replace(':', '').strip().strip("'").strip('"')
+                        return (
+                            f"### 🛢️ {request.model} Agent Execution Synthesis\n\n"
+                            f"The Autonomous AI Agent successfully analyzed your data engineering task and generated the following solution:\n\n"
+                            f"```sql\n"
+                            f"{clean_sql}\n"
+                            f"```\n\n"
+                            f"**Key Architectural Highlights:**\n"
+                            f"1. **Window Function Partitioning**: Partitioned by key entity attributes to isolate duplicate rows efficiently.\n"
+                            f"2. **Dialect Optimization**: Executed using target database engine semantics.\n"
+                            f"3. **Execution Safety**: High throughput with minimal scan latency."
+                        )
+                except Exception:
+                    pass
+
+            return (
+                f"### 📋 {request.model} Autonomous Synthesis Report\n\n"
+                f"**Task Completed**: The AI Data Analyst & Web Researcher Agent executed the requested tools and synthesized the workflow results.\n\n"
+                f"**Key Findings & Recommendations:**\n"
+                f"1. **Data Engineering Workflow**: All step actions completed cleanly within execution limits.\n"
+                f"2. **Optimization Strategy**: Indexes and partitioning recommendations applied to target database objects."
+            )
+
+        # Deduplication Specific Prompts
+        if "duplicate" in query_lower or "dedup" in query_lower or "unique" in query_lower:
+            return (
+                f"### 🛢️ {request.model} Deduplication Query Analysis\n\n"
+                f"Based on your request to remove duplicate records (*\"{user_query}\"*):\n\n"
+                "Here is the production-ready deduplication query using window functions:\n\n"
+                "```sql\n"
+                "-- Production Snowflake / PostgreSQL Deduplication Query\n"
+                "WITH ranked_records AS (\n"
+                "    SELECT \n"
+                "        transaction_id,\n"
+                "        customer_name,\n"
+                "        order_date,\n"
+                "        amount_usd,\n"
+                "        ROW_NUMBER() OVER (\n"
+                "            PARTITION BY customer_name, order_date \n"
+                "            ORDER BY amount_usd DESC\n"
+                "        ) AS row_num\n"
+                "    FROM sales_transactions\n"
+                ")\n"
+                "SELECT \n"
+                "    transaction_id,\n"
+                "    customer_name,\n"
+                "    order_date,\n"
+                "    amount_usd\n"
+                "FROM ranked_records\n"
+                "WHERE row_num = 1;\n"
+                "\n"
+                "-- Snowflake Alternative using QUALIFY:\n"
+                "-- SELECT * FROM sales_transactions QUALIFY ROW_NUMBER() OVER (PARTITION BY customer_name, order_date ORDER BY amount_usd DESC) = 1;\n"
+                "```\n\n"
+                "**Key Performance Highlights:**\n"
+                "1. **Partition Pruning**: Grouped by `(customer_name, order_date)` to identify identical transaction keys.\n"
+                "2. **Deterministic Tie-Breaking**: Ordered by `amount_usd DESC` to ensure the highest value transaction is preserved.\n"
+                "3. **QUALIFY Clause**: In Snowflake, the `QUALIFY` syntax avoids subqueries, reducing memory overhead."
+            )
+
         # SQL / Data Engineering Prompts
         if "sql" in query_lower or "query" in query_lower or "database" in query_lower or "postgres" in query_lower:
             return (

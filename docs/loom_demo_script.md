@@ -1,45 +1,133 @@
-# 🎬 AegisAI 2-Minute Video Demo Script
+# 🎬 AegisAI 4-Minute Video Demo Script & Sample Assets Guide
 
-This script provides a concise, step-by-step walkthrough for recording the 2-minute Loom demo required for the Week 2 Project exercise.
-
----
-
-## ⏱️ Video Timeline & Walkthrough
-
-### 0:00 - 0:20 | Introduction & Architecture Overview
-- **Visual**: Show the running FastAPI Swagger Docs at `http://localhost:8000/docs` and Streamlit UI at `http://localhost:8501`.
-- **Script**:
-  > "Hi! Welcome to AegisAI — our production containerized FastAPI microservice running open-weights LLMs locally with enterprise guardrails. This project addresses all Week 2 curriculum requirements: strict Pydantic v2 validation, JWT authentication, multi-role RBAC, sliding-window rate limiting, autonomous tool calling, and structured audit logging."
+This guide provides everything you need to record a seamless 4-minute demo video for your Data & AI Engineering assignment:
+1. **Demo Files** located in `demo_assets/`
+2. **Copy-Paste Sample Prompts** for each tab
+3. **End-to-End 4-Minute Spoken Script** with minute-by-minute timestamps and on-screen actions.
 
 ---
 
-### 0:20 - 0:45 | Authentication, JWT & RBAC Quick Role Switcher
-- **Visual**: Navigate to **Tab 1: Authentication & RBAC** in the Streamlit UI. Click **"Login as Admin (admin_user)"** and show the issued JWT access token and granted role badge.
-- **Script**:
-  > "First, we authenticate using OAuth2 password flow with bcrypt hashed passwords. Our microservice enforces strict Role-Based Access Control with 4 roles: Admin, Auditor, Developer, and User. Notice how logging in issues a signed JWT token containing user role and tenant context."
+## 📁 Demo Sample Assets (`demo_assets/`)
+
+| File Name | Location | Description / Purpose |
+| :--- | :--- | :--- |
+| **`sales_q3_report.csv`** | [`demo_assets/sales_q3_report.csv`](file:///Users/himishatunwal/Week%202%20Assignment/demo_assets/sales_q3_report.csv) | Enterprise transaction dataset for uploading in **Tab 2 (Document + Web Researcher)** |
+| **`ai_architecture_spec.pdf`** | [`demo_assets/ai_architecture_spec.pdf`](file:///Users/himishatunwal/Week%202%20Assignment/demo_assets/ai_architecture_spec.pdf) | Technical architectural PDF document for testing PDF Q&A |
+| **`ai_architecture_spec.txt`** | [`demo_assets/ai_architecture_spec.txt`](file:///Users/himishatunwal/Week%202%20Assignment/demo_assets/ai_architecture_spec.txt) | Plain text architecture specification |
 
 ---
 
-### 0:45 - 1:15 | Open LLM Chat & Autonomous Security Agent
-- **Visual**: 
-  1. Go to **Tab 2: Open Model Chat**. Select `llama3-open-8b`, choose a preset prompt template, enable **Enforce JSON Schema**, and run inference. Point out prompt/completion token counts and execution latency.
-  2. Switch to **Tab 3: Autonomous AI Agent**. Select the sample goal prompt: *"Scan IP address 45.33.32.156 for threat intelligence and evaluate risk."* Click **Execute**. Show the step-by-step tool execution findings and final executive report.
-- **Script**:
-  > "Next, in our Open Model Chat tab, we run fast inference on local models like Llama 3 8B with Pydantic v2 structured JSON schema validation. In our Autonomous Agent tab, the agent evaluates user goal prompts, automatically triggers sandboxed tools like our IP Threat Intelligence scanner, and synthesizes an executive security report."
+## 📋 Copy-Paste Sample Prompts
+
+### 🔹 Tab 1: Autonomous SQL AI Agent
+* **Prompt 1 (SQL Query Generation)**:
+  > `"Write an optimized Snowflake SQL query to aggregate total revenue, average transaction size, and total order count per product category for Q3, filtered for completed status and ordered by total revenue descending."`
+* **Prompt 2 (Dialect & DDL Creation)**:
+  > `"Generate a PostgreSQL CREATE TABLE schema for enterprise customer transactions including Pydantic v2 data validation constraints, primary key indexing, and timestamp default values."`
+
+### 🔹 Tab 2: AI Document + CSV Reader & Web Researcher
+* **Prompt 1 (CSV Document Analysis)**:
+  > `"What is the total sales revenue across all completed orders in the uploaded CSV, which region has the highest revenue, and how does this compare with current 2026 enterprise cloud spending benchmarks on the web?"`
+* **Prompt 2 (PDF Architectural Spec Query)**:
+  > `"Based on the uploaded architecture specification, what are the sliding window rate limits, supported open LLMs, and role access controls?"`
+
+### 🔹 Tab 3: Open Model Fast Inference Studio
+* **System Instruction**:
+  > `"You are an expert Data & AI Infrastructure Architect specializing in scalable Python FastAPI microservices and vector indexing pipelines."`
+* **User Prompt**:
+  > `"Compare PyArrow vs Pandas for processing 50GB parquet files in memory. Provide 3 key engineering tradeoffs and Python code snippets."`
 
 ---
 
-### 1:15 - 1:45 | Sandboxed Tool Registry, Audit Logs & Rate Limits
-- **Visual**:
-  1. Go to **Tab 4: Tool Registry**. Show tools like `vulnerability_scanner` and `compliance_evaluator`.
-  2. Go to **Tab 5: Audit Logs**. Show real-time SOC2 audit entries logged with timestamp, user ID, tenant ID, and action.
-  3. Go to **Tab 6: Rate Limits & Metrics**. Show live sliding-window Requests-per-Minute (RPM) and Tokens-per-Minute (TPM) quota progress bars.
-- **Script**:
-  > "For security, all tool calls run in a sandboxed execution boundary. Every single action is tracked in our Enterprise Structured Audit Logger for SOC2 compliance. Finally, our sliding-window rate limiter enforces RPM and TPM quotas per tenant, protecting our local models from abuse."
+## ⏱️ End-to-End 4-Minute Spoken Script
+
+```
+Total Duration: 04:00
+Target Word Count: ~550 - 600 words
+Pacing: Energetic, clear, professional Data & AI Engineer tone
+```
 
 ---
 
-### 1:45 - 2:00 | DevOps Toolchain & Conclusion
-- **Visual**: Show terminal with passing Pytest suite (`pytest tests/`) and Docker Compose running (`docker compose up`).
-- **Script**:
-  > "The entire application is packaged with `uv`, fully tested with Pytest, guarded by GitHub Actions CI, and containerized via multi-stage Docker builds. Thank you!"
+### 🟢 0:00 – 0:45 | Section 1: Introduction & Microservice Architecture
+* **On-Screen Action**: 
+  - Show Streamlit UI (`http://localhost:8501`) side-by-side with FastAPI Swagger Docs (`http://localhost:8000/docs`).
+  - Highlight the top navigation bar and active role indicator.
+* **Spoken Speech**:
+  > *"Hi everyone! Welcome to **AegisAI** — a containerized, production-grade FastAPI microservice and Streamlit workspace purpose-built for Data and AI Engineers.*
+  > 
+  > *In real-world data engineering pipelines, we need fast, local, zero-cost LLM intelligence with strict API guardrails. AegisAI solves this by hosting open-weights LLMs — like Llama 3 8B and Mistral 7B — behind signed OAuth2 JWT authentication, role-based access control, sliding-window rate limiting, and autonomous AI agents.*
+  > 
+  > *The backend is built with FastAPI and Pydantic v2, containerized with multi-stage Docker builds, and fully verified with Pytest."*
+
+---
+
+### 🔵 0:45 – 1:30 | Section 2: 1-Click Preset Auth, RBAC & Token Rate Limits
+* **On-Screen Action**:
+  - Point to the top **1-Click Preset Auth** dropdown in the header.
+  - Switch from **`Data Engineer (engineer_dev)`** to **`Analyst (analyst_user)`** and then **`Admin (admin_user)`**.
+  - Show the live **Raw JWT Access Token** container expanding and the dynamic **TPM Limit Adjuster** slider moving from `10,000` to `25,000`.
+* **Spoken Speech**:
+  > *"At the very top of our interface, notice our 1-Click Preset Auth dropdown. This allows data engineers and security auditors to instantly switch between active roles — Admin, Analyst, Data Engineer, and standard User.*
+  > 
+  > *When I switch roles, AegisAI instantly generates a cryptographically signed OAuth2 JWT access token using bcrypt hashed credentials. Below, you can inspect the live decoded JWT payload showing user ID, granted permissions, and token expiry.*
+  > 
+  > *Notice our dynamic Token Quota Adjuster. Administrators can scale tenant rate limits on the fly — for instance, bumping the sliding-window ceiling from 10,000 to 25,000 Tokens Per Minute to handle heavy batch ETL workloads."*
+
+---
+
+### 🟣 1:30 – 2:30 | Section 3: Autonomous SQL AI Agent
+* **On-Screen Action**:
+  - Click on **Tab 1: Autonomous SQL AI Agent**.
+  - Select target database engine: **`Snowflake`**.
+  - Paste Prompt: `"Write an optimized Snowflake SQL query to aggregate total revenue and average transaction size per product category, ordered by total revenue descending."`
+  - Click **⚡ Execute Autonomous Agent Task**.
+  - Scroll down to show the generated SQL query, execution strategy breakdown, and telemetry metrics (execution time, tokens used, model engine).
+* **Spoken Speech**:
+  > *"Now let's explore Tab 1: our Autonomous SQL AI Agent. For data engineers, writing complex multi-dialect SQL and query optimization plans can be time-consuming.*
+  > 
+  > *Here, I select target database engine 'Snowflake' and ask the agent to aggregate Q3 revenue and transaction counts by product category.*
+  > 
+  > *Under the hood, the autonomous agent analyzes the request, selects the dialect translation tool, generates clean dialect-specific SQL, and provides a structured execution strategy. Notice the telemetry block detailing model latency, backend engine, and exact token consumption."*
+
+---
+
+### 🟡 2:30 – 3:30 | Section 4: AI Document + CSV Reader & Web Researcher
+* **On-Screen Action**:
+  - Click on **Tab 2: AI Document + Web Researcher**.
+  - Click **Browse files** and upload `sales_q3_report.csv` from `demo_assets/`.
+  - Check the box **"Include Web Search RAG"**.
+  - Enter question: `"What is the total revenue in the uploaded CSV, and how does this compare with current 2026 enterprise cloud benchmarks on the web?"`
+  - Click **⚡ Research & Answer Question**.
+  - Show the response combining internal CSV data numbers (`$117,100.50`) with live web search benchmarks.
+* **Spoken Speech**:
+  > *"Next is Tab 2: AI Document + Web Researcher. In data engineering, we frequently need to synthesize internal dataset records with external web documentation.*
+  > 
+  > *I'll drag and drop our `sales_q3_report.csv` file from `demo_assets/`. With Web Search RAG enabled, I ask the agent to total our completed CSV revenue and contextualize it against current 2026 industry benchmarks.*
+  > 
+  > *The agent parses the uploaded CSV rows in real-time, extracts the exact revenue total, executes web search retrieval, and merges both private data and public web knowledge into a unified executive report."*
+
+---
+
+### 🔴 3:30 – 4:00 | Section 5: Open Model Inference Studio & Conclusion
+* **On-Screen Action**:
+  - Click on **Tab 3: Open Model Fast Inference Studio**.
+  - Set model: `llama3-open-8b`, Temperature: `0.7`, Max Tokens: `512`.
+  - Type prompt: `"Compare PyArrow vs Pandas for 50GB parquet files."`
+  - Click **⚡ Execute Model Completion**.
+  - Show model response, prompt/completion token count metrics, and closing screen.
+* **Spoken Speech**:
+  > *"Finally, Tab 3 is our Open Model Fast Inference Studio — a playground for testing open models like Llama 3 8B, tweaking temperature parameters, and prototyping custom system instructions.*
+  > 
+  > *In conclusion, AegisAI delivers an end-to-end, enterprise-ready AI microservice for Data Engineers — combining autonomous SQL generation, document RAG, open LLM inference, and robust RBAC security.*
+  > 
+  > *Thank you for watching!"*
+```
+
+---
+
+## 🎯 Tips for a Smooth Recording
+1. **Screen Layout**: Open Streamlit at `http://localhost:8501` in a full-screen browser window.
+2. **Preset Auth**: Keep `Data Engineer (engineer_dev)` selected at the start.
+3. **Files Ready**: Have `demo_assets/sales_q3_report.csv` visible on your desktop or file finder for easy drag-and-drop.
+4. **Volume**: Speak clearly into your microphone with confidence.

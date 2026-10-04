@@ -310,23 +310,67 @@ class ToolService:
                     )
 
                 else:  # Default: generate_sql
-                    sql_query = (
-                        f"-- Optimized {dialect.title()} Analytical Query\n"
-                        f"WITH quarterly_sales AS (\n"
-                        f"    SELECT \n"
-                        f"        c.customer_name,\n"
-                        f"        c.region,\n"
-                        f"        SUM(o.total_amount) AS revenue,\n"
-                        f"        DENSE_RANK() OVER (PARTITION BY c.region ORDER BY SUM(o.total_amount) DESC) AS rank_in_region\n"
-                        f"    FROM customers c\n"
-                        f"    JOIN orders o ON c.customer_id = o.customer_id\n"
-                        f"    WHERE o.order_date >= DATE_TRUNC('quarter', CURRENT_DATE - INTERVAL '3 months')\n"
-                        f"    GROUP BY c.customer_name, c.region\n"
-                        f")\n"
-                        f"SELECT * FROM quarterly_sales\n"
-                        f"WHERE rank_in_region <= 5\n"
-                        f"ORDER BY region, revenue DESC;"
-                    )
+                    prompt_lower = query_or_prompt.lower()
+                    if "duplicate" in prompt_lower or "dedup" in prompt_lower or "unique" in prompt_lower:
+                        if dialect == "snowflake":
+                            sql_query = (
+                                f"-- Deduplication Query (Snowflake Dialect)\n"
+                                f"SELECT *\n"
+                                f"FROM sales_transactions\n"
+                                f"QUALIFY ROW_NUMBER() OVER (\n"
+                                f"    PARTITION BY customer_name, order_date \n"
+                                f"    ORDER BY amount_usd DESC\n"
+                                f") = 1;"
+                            )
+                            expl = "Uses Snowflake's native QUALIFY clause with ROW_NUMBER() window function to remove duplicate records efficiently."
+                        else:
+                            sql_query = (
+                                f"-- Deduplication Query ({dialect.title()} Dialect)\n"
+                                f"WITH ranked_records AS (\n"
+                                f"    SELECT *,\n"
+                                f"        ROW_NUMBER() OVER (\n"
+                                f"            PARTITION BY customer_name, order_date \n"
+                                f"            ORDER BY amount_usd DESC\n"
+                                f"        ) AS row_num\n"
+                                f"    FROM sales_transactions\n"
+                                f")\n"
+                                f"SELECT * FROM ranked_records\n"
+                                f"WHERE row_num = 1;"
+                            )
+                            expl = f"Uses CTE and ROW_NUMBER() window function partitioned by customer_name and order_date in {dialect.title()} to retain only distinct records."
+                    elif any(k in prompt_lower for k in ["create", "schema", "table", "ddl"]):
+                        sql_query = (
+                            f"-- DDL Table Schema Creation ({dialect.title()})\n"
+                            f"CREATE TABLE IF NOT EXISTS sales_transactions (\n"
+                            f"    transaction_id VARCHAR(50) PRIMARY KEY,\n"
+                            f"    customer_name VARCHAR(100) NOT NULL,\n"
+                            f"    region VARCHAR(50) NOT NULL,\n"
+                            f"    order_date DATE NOT NULL,\n"
+                            f"    amount_usd NUMERIC(12, 2) NOT NULL CHECK (amount_usd >= 0),\n"
+                            f"    status VARCHAR(20) DEFAULT 'COMPLETED'\n"
+                            f");"
+                        )
+                        expl = f"Generates DDL table schema for {dialect.title()} with constraint checks and primary key indexing."
+                    else:
+                        sql_query = (
+                            f"-- Optimized {dialect.title()} Analytical Query\n"
+                            f"WITH quarterly_sales AS (\n"
+                            f"    SELECT \n"
+                            f"        c.customer_name,\n"
+                            f"        c.region,\n"
+                            f"        SUM(o.total_amount) AS revenue,\n"
+                            f"        DENSE_RANK() OVER (PARTITION BY c.region ORDER BY SUM(o.total_amount) DESC) AS rank_in_region\n"
+                            f"    FROM customers c\n"
+                            f"    JOIN orders o ON c.customer_id = o.customer_id\n"
+                            f"    WHERE o.order_date >= DATE_TRUNC('quarter', CURRENT_DATE - INTERVAL '3 months')\n"
+                            f"    GROUP BY c.customer_name, c.region\n"
+                            f")\n"
+                            f"SELECT * FROM quarterly_sales\n"
+                            f"WHERE rank_in_region <= 5\n"
+                            f"ORDER BY region, revenue DESC;"
+                        )
+                        expl = "Uses CTE and region-partitioned DENSE_RANK window function for top 5 regional customer revenue."
+
                     return ToolExecutionResponse(
                         tool_name=tool_name,
                         status="success",
@@ -334,7 +378,7 @@ class ToolService:
                             "task": "generate_sql",
                             "dialect": dialect,
                             "generated_sql": sql_query,
-                            "explanation": "Uses CTE and region-partitioned DENSE_RANK window function for top 5 regional customer revenue.",
+                            "explanation": expl,
                         },
                     )
 
