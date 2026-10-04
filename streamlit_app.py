@@ -370,20 +370,19 @@ with tab_analyst:
                     
                     st.markdown("#### ⚡ Autonomous Tool Steps Executed")
                     for step in sdata.get("steps", []):
-                        st.markdown(
-                            f"""
-                            <div class="timeline-step">
-                                <strong>Step {step['step_number']}: [{step['action']}] Tool <code>{step['tool_name']}</code></strong><br>
-                                <span style="color:#94A3B8; font-size:0.85rem;">Arguments:</span> <code>{json.dumps(step['arguments'])}</code><br>
-                                <span style="color:#94A3B8; font-size:0.85rem;">Output Result:</span>
-                                <pre style="margin-top:4px; font-size:0.85rem; color:#38BDF8;">{json.dumps(step['output'], indent=2)}</pre>
-                            </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
+                        st.markdown(f"**Step {step['step_number']}: [{step['action']}] Tool `{step['tool_name']}`**")
+                        st.caption(f"Arguments: {json.dumps(step['arguments'])}")
+                        out_obj = step.get("output", {})
+                        if isinstance(out_obj, dict) and "generated_sql" in out_obj:
+                            raw_sql = str(out_obj["generated_sql"]).replace("\\n", "\n")
+                            st.code(raw_sql, language="sql")
+                            if "explanation" in out_obj:
+                                st.caption(f"💡 **Explanation**: {out_obj['explanation']}")
+                        else:
+                            st.json(out_obj)
 
                     st.markdown("#### 📋 Structured Analyst Report")
-                    st.info(sdata.get("final_synthesis"))
+                    st.markdown(sdata.get("final_synthesis"))
                 else:
                     st.error(f"Analyst Agent Error ({resp.status_code}): {resp.json().get('detail')}")
             except Exception as e:
@@ -419,7 +418,7 @@ with tab_doc_web:
 
     c_w1, c_w2 = st.columns([3, 1])
     with c_w1:
-        user_q = st.text_input("Ask ANY Question (Combining Document Data & Web Search):", value="What is the total revenue in the CSV, and what are current cloud data warehouse benchmarks for this scale?")
+        user_q = st.text_input("Ask ANY Question (Combining Document Data & Web Search):", value="What is the total sales revenue across all completed orders in the uploaded CSV, which region has the highest revenue, and how does this compare with current 2026 enterprise cloud spending benchmarks on the web?")
     with c_w2:
         enable_web_search = st.checkbox("Include Web Search RAG", value=True)
 
@@ -441,12 +440,12 @@ with tab_doc_web:
                     res_data = resp.json()
                     st.success("Document & Web Research Completed!")
                     
-                    st.markdown("#### 🔍 Extracted Document & Web Knowledge Telemetry")
-                    for step in res_data.get("steps", []):
-                        st.json(step["output"])
-
                     st.markdown("#### 🤖 Synthesized Answer (Document Data + Web Knowledge)")
-                    st.info(res_data.get("final_synthesis"))
+                    st.markdown(res_data.get("final_synthesis"))
+                    
+                    with st.expander("🔍 View Extracted Document & Web Knowledge Telemetry", expanded=False):
+                        for step in res_data.get("steps", []):
+                            st.json(step["output"])
                 else:
                     st.error(f"Research Error ({resp.status_code}): {resp.json().get('detail')}")
             except Exception as e:
