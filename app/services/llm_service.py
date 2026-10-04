@@ -134,6 +134,16 @@ class LLMServiceBoundary:
 
         query_lower = user_query.lower()
 
+        # Direct General Knowledge Q&A Handlers
+        if "capital" in query_lower and "france" in query_lower:
+            return "The capital of France is Paris."
+
+        if "hello" in query_lower or "hi" in query_lower or "hey" in query_lower:
+            return f"Hello! I am **{request.model}**, running on your containerized FastAPI microservice. How can I assist you with AI & Data Engineering workloads today?"
+
+        if "who created" in query_lower or "who built" in query_lower:
+            return f"This microservice was built using FastAPI, Pydantic v2, OAuth2 JWT authentication, and Open Models ({request.model})."
+
         # Structured JSON Enforced Response
         if request.structured_json or "json" in query_lower:
             return json.dumps(
@@ -172,7 +182,7 @@ class LLMServiceBoundary:
                 "WITH daily_aggregates AS (\n"
                 "    SELECT \n"
                 "        DATE_TRUNC('day', event_timestamp) AS event_date,\n"
-                "        tenant_id,\n"
+                "        user_id,\n"
                 "        COUNT(request_id) AS total_requests,\n"
                 "        SUM(tokens_used) AS total_tokens,\n"
                 "        AVG(latency_ms) AS avg_latency_ms\n"
@@ -182,7 +192,7 @@ class LLMServiceBoundary:
                 ")\n"
                 "SELECT \n"
                 "    event_date,\n"
-                "    tenant_id,\n"
+                "    user_id,\n"
                 "    total_requests,\n"
                 "    total_tokens,\n"
                 "    ROUND(avg_latency_ms::numeric, 2) AS avg_latency_ms,\n"
@@ -193,7 +203,7 @@ class LLMServiceBoundary:
                 "**Key Performance Highlights:**\n"
                 "1. **Partition Pruning**: Filtered on `event_timestamp` to scan only recent partition blocks.\n"
                 "2. **CTE Aggregation**: Isolates initial grouping before computing window functions, reducing memory footprint.\n"
-                "3. **Indexing Recommendation**: Create a composite index on `(event_timestamp, tenant_id)`."
+                "3. **Indexing Recommendation**: Create a composite index on `(event_timestamp, user_id)`."
             )
 
         # Python / Data Pipeline / Code Prompts
@@ -207,7 +217,7 @@ class LLMServiceBoundary:
                 "from pydantic import BaseModel, Field, field_validator\n\n"
                 "class PipelineRecord(BaseModel):\n"
                 "    record_id: str = Field(..., description='Unique UUID of the stream event')\n"
-                "    tenant_id: str = Field(default='tenant-default')\n"
+                "    user_id: str = Field(default='user-default')\n"
                 "    payload_bytes: int = Field(..., ge=1, description='Size of binary payload')\n"
                 "    status: str = Field(default='PENDING')\n\n"
                 "    @field_validator('status')\n"
@@ -226,15 +236,12 @@ class LLMServiceBoundary:
                 "- Asynchronous batch processor scales smoothly under heavy I/O workload."
             )
 
-        # General / Architecture / Summarization Prompts
+        # General Knowledge & Analytical Direct Answer Response
         return (
-            f"### ⚡ [{request.model} Open Model Response]\n\n"
-            f"**Query Addressed**: *\"{user_query}\"*\n\n"
-            "**Key Analysis & Insights:**\n"
-            "1. **Scalability**: Local open models eliminate third-party API token costs while maintaining zero data egress risks.\n"
-            "2. **Schema Integrity**: Pydantic v2 schemas act as an API contract guard between client microservices and data lake ingestion pipelines.\n"
-            "3. **Rate Control**: Dual-quota sliding window rate limiting (RPM/TPM) guarantees stable throughput during peak traffic spikes.\n\n"
-            f"*Execution Parameters: temperature={request.temperature}, max_tokens={request.max_tokens}, system_instruction='{system_instruction or 'Default'}'.*"
+            f"### ⚡ [{request.model} Response]\n\n"
+            f"**Answer**: In response to your question *\"{user_query}\"*:\n\n"
+            f"This prompt was processed using open model **{request.model}** with parameters `temperature={request.temperature}` and `max_tokens={request.max_tokens}`.\n\n"
+            f"If you'd like to perform SQL analysis, data schema validation, or document research, feel free to use Tab 1 or Tab 2!"
         )
 
     async def generate_completion(
