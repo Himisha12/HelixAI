@@ -14,11 +14,11 @@ BT
 /F1 10 Tf
 12 TL
 50 760 Td
-(AegisAI Microservice System Architecture Specification) Tj T*
+(HelixAI Microservice System Architecture Specification) Tj T*
 (==================================================) Tj T*
 () Tj T*
 (1. Overview) Tj T*
-(AegisAI is a production-grade FastAPI microservice tailored for Data & AI Engineering workloads.) Tj T*
+(HelixAI is a production-grade FastAPI microservice tailored for Data & AI Engineering workloads.) Tj T*
 (It features autonomous tool calling, local open LLM inference \(Llama 3 8B, Mistral 7B\), JWT authentication,) Tj T*
 (multi-role RBAC \(Admin, Analyst, Data Engineer, User\), and sliding-window rate limiting.) Tj T*
 () Tj T*

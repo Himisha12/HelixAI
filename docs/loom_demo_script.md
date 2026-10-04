@@ -1,4 +1,4 @@
-# 🎬 AegisAI 4-Minute Video Demo Script & Sample Assets Guide
+# 🎬 HelixAI 4-Minute Video Demo Script & Sample Assets Guide
 
 This guide provides everything you need to record a seamless 4-minute demo video for your Data & AI Engineering assignment:
 1. **Demo Files** located in `demo_assets/`
@@ -54,9 +54,9 @@ Pacing: Energetic, clear, professional Data & AI Engineer tone
   - Show Streamlit UI (`http://localhost:8501`) side-by-side with FastAPI Swagger Docs (`http://localhost:8000/docs`).
   - Highlight the top navigation bar and active role indicator.
 * **Spoken Speech**:
-  > *"Hi everyone! Welcome to **AegisAI** — a containerized, production-grade FastAPI microservice and Streamlit workspace purpose-built for Data and AI Engineers.*
+  > *"Hi everyone! Welcome to **HelixAI** — a containerized, production-grade FastAPI microservice and Streamlit workspace purpose-built for Data and AI Engineers.*
   > 
-  > *In real-world data engineering pipelines, we need fast, local, zero-cost LLM intelligence with strict API guardrails. AegisAI solves this by hosting open-weights LLMs — like Llama 3 8B and Mistral 7B — behind signed OAuth2 JWT authentication, role-based access control, sliding-window rate limiting, and autonomous AI agents.*
+  > *In real-world data engineering pipelines, we need fast, local, zero-cost LLM intelligence with strict API guardrails. HelixAI solves this by hosting open-weights LLMs — like Llama 3 8B and Mistral 7B — behind signed OAuth2 JWT authentication, role-based access control, sliding-window rate limiting, and autonomous AI agents.*
   > 
   > *The backend is built with FastAPI and Pydantic v2, containerized with multi-stage Docker builds, and fully verified with Pytest."*
 
@@ -70,7 +70,7 @@ Pacing: Energetic, clear, professional Data & AI Engineer tone
 * **Spoken Speech**:
   > *"At the very top of our interface, notice our 1-Click Preset Auth dropdown. This allows data engineers and security auditors to instantly switch between active roles — Admin, Analyst, Data Engineer, and standard User.*
   > 
-  > *When I switch roles, AegisAI instantly generates a cryptographically signed OAuth2 JWT access token using bcrypt hashed credentials. Below, you can inspect the live decoded JWT payload showing user ID, granted permissions, and token expiry.*
+  > *When I switch roles, HelixAI instantly generates a cryptographically signed OAuth2 JWT access token using bcrypt hashed credentials. Below, you can inspect the live decoded JWT payload showing user ID, granted permissions, and token expiry.*
   > 
   > *Notice our dynamic Token Quota Adjuster. Administrators can scale tenant rate limits on the fly — for instance, bumping the sliding-window ceiling from 10,000 to 25,000 Tokens Per Minute to handle heavy batch ETL workloads."*
 
@@ -119,7 +119,7 @@ Pacing: Energetic, clear, professional Data & AI Engineer tone
 * **Spoken Speech**:
   > *"Finally, Tab 3 is our Open Model Fast Inference Studio — a playground for testing open models like Llama 3 8B, tweaking temperature parameters, and prototyping custom system instructions.*
   > 
-  > *In conclusion, AegisAI delivers an end-to-end, enterprise-ready AI microservice for Data Engineers — combining autonomous SQL generation, document RAG, open LLM inference, and robust RBAC security.*
+  > *In conclusion, HelixAI delivers an end-to-end, enterprise-ready AI microservice for Data Engineers — combining autonomous SQL generation, document RAG, open LLM inference, and robust RBAC security.*
   > 
   > *Thank you for watching!"*
 ```

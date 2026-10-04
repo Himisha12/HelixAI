@@ -199,7 +199,7 @@ if not st.session_state["jwt_token"]:
     st.markdown(
         """
         <div class="top-navbar">
-            <div class="hero-title">🔐 AegisAI Identity & JWT Authentication Gateway</div>
+            <div class="hero-title">🔐 HelixAI Identity & JWT Authentication Gateway</div>
             <div class="hero-subtitle">OAuth2 Password Flow + Bcrypt Password Hashing + Signed JWT Token Generation</div>
         </div>
         """,

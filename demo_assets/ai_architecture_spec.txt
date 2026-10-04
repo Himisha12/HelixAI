@@ -1,8 +1,8 @@
-AegisAI Microservice System Architecture Specification
+HelixAI Microservice System Architecture Specification
 ==================================================
 
 1. Overview
-AegisAI is a production-grade FastAPI microservice tailored for Data & AI Engineering workloads.
+HelixAI is a production-grade FastAPI microservice tailored for Data & AI Engineering workloads.
 It features autonomous tool calling, local open LLM inference (Llama 3 8B, Mistral 7B), JWT authentication,
 multi-role RBAC (Admin, Analyst, Data Engineer, User), and sliding-window rate limiting.
 

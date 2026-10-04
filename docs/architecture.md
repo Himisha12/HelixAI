@@ -1,7 +1,7 @@
-# AegisAI Architecture & Technical Documentation
+# HelixAI Architecture & Technical Documentation
 
 ## Overview
-**AegisAI** is a production-grade, containerized FastAPI microservice for executing **Open Weights Language Models** (Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via free-tier API endpoints. The microservice enforces strict data validation via **Pydantic v2**, secures endpoints with **JWT authentication**, implements **Role-Based Access Control (RBAC)**, tracks quotas with an **AI-specific sliding-window rate limiter**, executes an **Autonomous AI Agent**, and maintains an **Enterprise Structured Audit Logger**.
+**HelixAI** is a production-grade, containerized FastAPI microservice for executing **Open Weights Language Models** (Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via free-tier API endpoints. The microservice enforces strict data validation via **Pydantic v2**, secures endpoints with **JWT authentication**, implements **Role-Based Access Control (RBAC)**, tracks quotas with an **AI-specific sliding-window rate limiter**, executes an **Autonomous AI Agent**, and maintains an **Enterprise Structured Audit Logger**.
 
 ---
 
