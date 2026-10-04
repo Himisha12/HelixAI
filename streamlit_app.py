@@ -453,17 +453,15 @@ with tab_doc_web:
 # ---------------------------------------------------------
 with tab_chat:
     st.subheader("💬 Open Model Fast Inference & Prompt Studio")
-    st.write("Direct raw prompt playground for prompt engineering, system instruction design, temperature testing, and Pydantic v2 structured JSON validation (`/api/v1/chat/completions`).")
+    st.write("Direct raw prompt playground for prompt engineering, system instruction design, temperature testing, and token management (`/api/v1/chat/completions`).")
     
-    c1, c2, c3, c4 = st.columns([2, 1, 1, 1])
+    c1, c2, c3 = st.columns([2, 1, 1])
     with c1:
         chat_model = st.selectbox("Open Model Engine", ["llama3-open-8b", "mistral-7b-open", "phi3-mini-open"], index=0, key="c_mod")
     with c2:
         temp = st.slider("Temperature", 0.0, 1.0, 0.7, 0.1, help="0.0 = Deterministic, 0.7 = Balanced, 1.0 = Creative")
     with c3:
         max_tok = st.slider("Max Tokens", 64, 2048, 512, 64, help="Adjust token generation limit")
-    with c4:
-        json_enforce = st.checkbox("Structured JSON", value=False)
 
     st.markdown("#### 📜 Prompt Engineering Template Registry")
     try:
@@ -496,7 +494,7 @@ with tab_chat:
             ],
             "temperature": temp,
             "max_tokens": max_tok,
-            "structured_json": json_enforce,
+            "structured_json": False,
         }
 
         with st.spinner("Processing open model completion..."):
@@ -516,7 +514,7 @@ with tab_chat:
                     m_col4.metric("Total Tokens", res_data.get("usage", {}).get("total_tokens"))
 
                     st.markdown("#### 🤖 Model Completion Output")
-                    st.code(res_data["choices"][0]["message"]["content"], language="json" if json_enforce else "markdown")
+                    st.code(res_data["choices"][0]["message"]["content"], language="markdown")
                 else:
                     st.error(f"Inference Error ({c_resp.status_code}): {c_resp.json().get('detail')}")
             except Exception as e:
