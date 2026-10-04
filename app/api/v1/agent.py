@@ -7,18 +7,17 @@ from app.core.rbac import Permission, PermissionChecker
 from app.models.auth import UserInDB
 from app.models.chat import ChatCompletionRequest, ChatMessage
 from app.models.tools import ToolExecutionRequest
-from app.services.audit_service import audit_logger
 from app.services.llm_service import llm_service
 from app.services.tool_service import tool_service
 
-router = APIRouter(prefix="/agent", tags=["Autonomous AI Agent"])
+router = APIRouter(prefix="/agent", tags=["Autonomous Data AI Agent"])
 
 
 class AgentRunRequest(BaseModel):
     task_description: str = Field(
         ...,
-        description="Goal or investigation prompt for the autonomous agent",
-        json_schema_extra={"example": "Scan IP address 45.33.32.156 for threat intelligence and assess risk."},
+        description="Goal prompt for the autonomous data engineering agent",
+        json_schema_extra={"example": "Generate top customer revenue query in Postgres and validate sample JSON records."},
     )
     model: str = Field(default="llama3-open-8b")
 
@@ -42,7 +41,7 @@ class AgentRunResponse(BaseModel):
 @router.post(
     "/run",
     response_model=AgentRunResponse,
-    summary="Execute autonomous multi-tool AI security workflow (RBAC Protected)"
+    summary="Execute autonomous data engineering AI workflow (RBAC Protected)"
 )
 async def run_autonomous_agent(
     request: AgentRunRequest,
@@ -58,54 +57,79 @@ async def run_autonomous_agent(
 
     steps: List[AgentStep] = []
 
-    # Autonomous Tool Selection Routing
-    if "ip" in task_lower or "address" in task_lower or "scan" in task_lower:
-        import re
-        ip_match = re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", task)
-        target_ip = ip_match.group(0) if ip_match else "45.33.32.156"
-
+    # Autonomous Tool Selection Routing for Data Engineering Workflows
+    if "sql" in task_lower or "query" in task_lower or "revenue" in task_lower or "postgres" in task_lower or "snowflake" in task_lower:
         exec_res = tool_service.execute_tool(
-            ToolExecutionRequest(tool_name="ip_threat_lookup", arguments={"ip_address": target_ip})
+            ToolExecutionRequest(
+                tool_name="sql_query_generator",
+                arguments={"data_request": task, "dialect": "postgres"}
+            )
         )
         steps.append(
             AgentStep(
                 step_number=1,
                 action="Tool Execution",
-                tool_name="ip_threat_lookup",
-                arguments={"ip_address": target_ip},
+                tool_name="sql_query_generator",
+                arguments={"data_request": task, "dialect": "postgres"},
                 output=exec_res.result,
             )
         )
 
-    if "code" in task_lower or "eval" in task_lower or "vulnerability" in task_lower or "secret" in task_lower:
+    if "json" in task_lower or "schema" in task_lower or "validate" in task_lower or "record" in task_lower:
+        sample_json = '{"record_id": "rec-101", "user_email": "user@data.io", "amount": 250.50, "status": "ACTIVE"}'
         exec_res = tool_service.execute_tool(
-            ToolExecutionRequest(tool_name="vulnerability_scanner", arguments={"code_snippet": task})
+            ToolExecutionRequest(
+                tool_name="data_schema_validator",
+                arguments={"json_payload": sample_json}
+            )
         )
         steps.append(
             AgentStep(
                 step_number=len(steps) + 1,
                 action="Tool Execution",
-                tool_name="vulnerability_scanner",
-                arguments={"code_snippet": task},
+                tool_name="data_schema_validator",
+                arguments={"json_payload": sample_json},
                 output=exec_res.result,
             )
         )
 
-    if "compliance" in task_lower or "soc2" in task_lower or "hipaa" in task_lower:
+    if "csv" in task_lower or "tabular" in task_lower or "profile" in task_lower:
+        sample_csv = "id,name,revenue\n1,Alpha Corp,5000\n2,Beta Inc,12000"
         exec_res = tool_service.execute_tool(
-            ToolExecutionRequest(tool_name="compliance_evaluator", arguments={"policy_text": task})
+            ToolExecutionRequest(
+                tool_name="csv_data_analyzer",
+                arguments={"csv_text": sample_csv}
+            )
         )
         steps.append(
             AgentStep(
                 step_number=len(steps) + 1,
                 action="Tool Execution",
-                tool_name="compliance_evaluator",
-                arguments={"policy_text": task},
+                tool_name="csv_data_analyzer",
+                arguments={"csv_text": sample_csv},
+                output=exec_res.result,
+            )
+        )
+
+    if "summary" in task_lower or "summarize" in task_lower or "text" in task_lower:
+        exec_res = tool_service.execute_tool(
+            ToolExecutionRequest(
+                tool_name="text_summarizer",
+                arguments={"text": task, "style": "executive"}
+            )
+        )
+        steps.append(
+            AgentStep(
+                step_number=len(steps) + 1,
+                action="Tool Execution",
+                tool_name="text_summarizer",
+                arguments={"text": task, "style": "executive"},
                 output=exec_res.result,
             )
         )
 
     if not steps:
+        # Fallback to calculator if numbers present
         import re
         if any(op in task for op in ["+", "*", "-", "/"]) and any(c.isdigit() for c in task):
             math_match = re.search(r"[\d\s\+\-\*\/\(\)]+", task)
@@ -129,11 +153,11 @@ async def run_autonomous_agent(
     prompt_messages = [
         ChatMessage(
             role="system",
-            content="You are an Enterprise Autonomous AI Agent. Synthesize tool telemetry into a clean executive summary.",
+            content="You are an Enterprise Autonomous Data AI Agent. Synthesize tool execution telemetry into a clear executive summary.",
         ),
         ChatMessage(
             role="user",
-            content=f"Task Goal: {task}\nCollected Autonomous Evidence:\n{findings_str or 'No specific tool triggers fired.'}\nProvide final synthesis.",
+            content=f"Task Goal: {task}\nCollected Autonomous Telemetry:\n{findings_str or 'No specific tool triggers fired.'}\nProvide final synthesis.",
         ),
     ]
 
@@ -142,14 +166,6 @@ async def run_autonomous_agent(
     )
 
     elapsed_ms = round((time.time() - start_time) * 1000, 2)
-
-    audit_logger.log(
-        user_id=current_user.username,
-        action="AUTONOMOUS_AGENT_EXECUTION",
-        resource="/agent/run",
-        status="SUCCESS",
-        details={"task": task, "steps_executed": len(steps), "latency_ms": elapsed_ms},
-    )
 
     return AgentRunResponse(
         task=task,

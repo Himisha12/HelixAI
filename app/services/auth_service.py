@@ -8,21 +8,19 @@ from app.models.auth import UserCreate, UserInDB, UserResponse
 class AuthService:
     """
     In-memory User Management & Authentication Service.
-    In a full production database setup, this connects to PostgreSQL/MongoDB via SQLAlchemy/Beanie.
-    Pre-seeded with RBAC demo accounts (Admin, Auditor, Developer, User).
+    Pre-seeded with Data & AI Engineering demo accounts (Admin, Data Engineer, Analyst, User).
     """
 
     def __init__(self) -> None:
         self._users_db: Dict[str, UserInDB] = {}
-        # Pre-seed demo users across all roles for RBAC testing & Loom video demo
         self._seed_demo_users()
 
     def _seed_demo_users(self) -> None:
         demo_accounts = [
             ("demo_user", "demo@ai-microservice.io", "demo123", Role.USER.value),
             ("admin_user", "admin@ai-microservice.io", "admin123", Role.ADMIN.value),
-            ("auditor_user", "auditor@ai-microservice.io", "audit123", Role.AUDITOR.value),
-            ("dev_user", "dev@ai-microservice.io", "dev123", Role.DEVELOPER.value),
+            ("data_eng_user", "data_eng@ai-microservice.io", "data123", Role.DATA_ENGINEER.value),
+            ("analyst_user", "analyst@ai-microservice.io", "analyst123", Role.ANALYST.value),
         ]
 
         for username, email, pwd, role in demo_accounts:

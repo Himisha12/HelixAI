@@ -14,7 +14,7 @@ class PromptTemplate(BaseModel):
 class PromptTemplateRegistry:
     """
     Prompt Engineering & Template Registry supporting reusable system prompt patterns,
-    role prompting, instruction design, and variable interpolation.
+    role prompting, instruction design, and variable interpolation tailored for Data & AI Engineering.
     """
 
     def __init__(self) -> None:
@@ -22,58 +22,57 @@ class PromptTemplateRegistry:
         self._register_default_templates()
 
     def _register_default_templates(self) -> None:
-        self._templates["security_auditor"] = PromptTemplate(
-            id="security_auditor",
-            name="Enterprise Security Auditor",
-            category="Security & Audit",
-            description="Role prompt instructing the model to act as a CISSP security auditor searching for OWASP risks.",
+        self._templates["sql_pipeline_architect"] = PromptTemplate(
+            id="sql_pipeline_architect",
+            name="SQL & Data Pipeline Architect",
+            category="Data Engineering",
+            description="Role prompt instructing the model to generate optimized SQL queries with CTEs, window functions, and partitioning.",
             template_text=(
-                "You are an expert Chief Information Security Officer (CISO) and CISSP certified auditor.\n"
-                "Analyze the provided code or architecture for OWASP Top 10 vulnerabilities, unauthorized access risks, "
-                "and hardcoded secrets.\n"
-                "Provide clear severity ratings (CRITICAL, HIGH, MEDIUM, LOW) and actionable remediation code.\n"
-                "Target Input: {input_text}"
-            ),
-            variables=["input_text"],
-        )
-
-        self._templates["compliance_analyst"] = PromptTemplate(
-            id="compliance_analyst",
-            name="SOC2 & HIPAA Compliance Analyst",
-            category="Governance",
-            description="Role prompt instructing the model to evaluate compliance against SOC2, HIPAA, and GDPR frameworks.",
-            template_text=(
-                "You are a Senior Regulatory & Compliance Analyst specializing in SOC2 Type II, HIPAA, and GDPR.\n"
-                "Evaluate the following policy or data workflow specification for compliance gaps:\n"
+                "You are a Principal Data Engineer and SQL Architect specializing in PostgreSQL, Snowflake, and BigQuery.\n"
+                "Write an optimized, production-ready SQL query based on the following requirement:\n"
                 "'{input_text}'\n"
-                "List specific compliance control failures, risk severity, and recommended policy adjustments."
+                "Include window functions, CTEs where appropriate, partition filter strategies, and indexing recommendations."
             ),
             variables=["input_text"],
         )
 
-        self._templates["code_refactoring_expert"] = PromptTemplate(
-            id="code_refactoring_expert",
-            name="Async Python & Type Safety Expert",
+        self._templates["data_quality_inspector"] = PromptTemplate(
+            id="data_quality_inspector",
+            name="Data Quality & Schema Drift Inspector",
+            category="Data Governance",
+            description="Role prompt instructing model to evaluate datasets for schema validation, missing fields, and null rates.",
+            template_text=(
+                "You are a Data Quality Engineer specializing in Great Expectations, PySpark, and Data Lake Governance.\n"
+                "Analyze the following schema or data record payload:\n"
+                "'{input_text}'\n"
+                "Highlight schema drift issues, null value rates, data type mismatches, and data validation rules."
+            ),
+            variables=["input_text"],
+        )
+
+        self._templates["async_python_expert"] = PromptTemplate(
+            id="async_python_expert",
+            name="Async Python & Pydantic v2 Architect",
             category="Development",
-            description="Role prompt instructing model to refactor Python code using Pydantic v2, strict typing, and async patterns.",
+            description="Role prompt instructing model to refactor Python data pipelines using Pydantic v2, strict typing, and AsyncIO.",
             template_text=(
-                "You are a Principal Python Architect expert in AsyncIO, Pydantic v2, strict type hinting, and FastAPI.\n"
-                "Refactor the following Python snippet for production execution:\n"
+                "You are a Principal Python Engineer expert in AsyncIO, Pydantic v2, strict type hinting, and FastAPI.\n"
+                "Refactor the following code snippet into clean, production-grade Python:\n"
                 "```python\n{input_text}\n```\n"
-                "Ensure clean exception handling, docstrings, and optimal performance."
+                "Ensure strict Pydantic v2 validators, clear exception handling, and optimal async execution."
             ),
             variables=["input_text"],
         )
 
-        self._templates["structured_json_extractor"] = PromptTemplate(
-            id="structured_json_extractor",
-            name="Structured Data JSON Extractor",
-            category="Data Extraction",
-            description="Role prompt forcing model to return strict validated JSON schema format.",
+        self._templates["executive_summarizer"] = PromptTemplate(
+            id="executive_summarizer",
+            name="Executive Summary & Document Analyzer",
+            category="AI Analytics",
+            description="Role prompt instructing model to condense complex text into key executive bullets and action items.",
             template_text=(
-                "You are an automated JSON Data Extraction engine.\n"
-                "Parse the following input text and output ONLY valid JSON matching the requested schema.\n"
-                "Input Data: {input_text}"
+                "You are an AI Analytics Specialist.\n"
+                "Summarize the following document or data report into key executive bullet points, core findings, and action items:\n"
+                "'{input_text}'"
             ),
             variables=["input_text"],
         )

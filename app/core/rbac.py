@@ -5,15 +5,14 @@ from app.core.exceptions import PermissionDeniedException
 
 class Role(str, Enum):
     ADMIN = "admin"
-    AUDITOR = "auditor"
-    DEVELOPER = "developer"
+    DATA_ENGINEER = "data_engineer"
+    ANALYST = "analyst"
     USER = "user"
 
 
 class Permission(str, Enum):
     CHAT_INFER = "chat:infer"
     TOOLS_EXECUTE = "tools:execute"
-    AUDIT_READ = "audit:read"
     METRICS_READ = "metrics:read"
     MODELS_READ = "models:read"
     ADMIN_ALL = "admin:all"
@@ -25,26 +24,23 @@ ROLE_PERMISSIONS: Dict[Role, Set[Permission]] = {
     Role.ADMIN: {
         Permission.CHAT_INFER,
         Permission.TOOLS_EXECUTE,
-        Permission.AUDIT_READ,
         Permission.METRICS_READ,
         Permission.MODELS_READ,
         Permission.ADMIN_ALL,
         Permission.POLICY_EVALUATE,
     },
-    Role.AUDITOR: {
+    Role.DATA_ENGINEER: {
         Permission.CHAT_INFER,
         Permission.TOOLS_EXECUTE,
-        Permission.AUDIT_READ,
         Permission.METRICS_READ,
         Permission.MODELS_READ,
         Permission.POLICY_EVALUATE,
     },
-    Role.DEVELOPER: {
+    Role.ANALYST: {
         Permission.CHAT_INFER,
         Permission.TOOLS_EXECUTE,
         Permission.METRICS_READ,
         Permission.MODELS_READ,
-        Permission.POLICY_EVALUATE,
     },
     Role.USER: {
         Permission.CHAT_INFER,

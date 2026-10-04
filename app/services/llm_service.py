@@ -26,7 +26,7 @@ class LLMServiceBoundary:
                 name="Meta Llama 3 8B Open Model",
                 backend=settings.LLM_BACKEND,
                 context_window=8192,
-                description="High-performance open weights model optimized for general reasoning and fast inference.",
+                description="High-performance open weights model optimized for general reasoning, SQL generation, and data engineering workflows.",
                 is_local=True,
             ),
             "mistral-7b-open": ModelInfo(
@@ -34,7 +34,7 @@ class LLMServiceBoundary:
                 name="Mistral 7B Instruct Open Model",
                 backend=settings.LLM_BACKEND,
                 context_window=8192,
-                description="Fast and compact open instruction-tuned model for structured output and coding.",
+                description="Fast and compact open instruction-tuned model for structured outputs, Python code generation, and schema validation.",
                 is_local=True,
             ),
             "phi3-mini-open": ModelInfo(
@@ -42,7 +42,7 @@ class LLMServiceBoundary:
                 name="Phi-3 Mini Open Model",
                 backend=settings.LLM_BACKEND,
                 context_window=4096,
-                description="Ultra-lightweight open model for low latency local edge execution.",
+                description="Ultra-lightweight open model for low latency local edge execution and fast summarization.",
                 is_local=True,
             ),
         }
@@ -57,7 +57,7 @@ class LLMServiceBoundary:
         """
         Build compiled prompt from role instructions and system prompt templates.
         """
-        system_content = "You are an expert AI Assistant running on a local open model microservice."
+        system_content = "You are an expert Data & AI Engineering Assistant running on a local open model microservice."
         if request.system_prompt_template:
             system_content = request.system_prompt_template
 
@@ -122,48 +122,119 @@ class LLMServiceBoundary:
     def _generate_local_fast_response(self, request: ChatCompletionRequest) -> str:
         """
         Fast local engine response generator simulating local open weights model execution.
-        Handles structured JSON format requests and context-aware responses.
+        Generates context-aware, highly detailed responses tailored for Data & AI Engineering.
         """
         user_query = ""
-        for msg in reversed(request.messages):
-            if msg.role == "user":
+        system_instruction = ""
+        for msg in request.messages:
+            if msg.role == "system":
+                system_instruction = msg.content
+            elif msg.role == "user":
                 user_query = msg.content
-                break
 
         query_lower = user_query.lower()
 
+        # Structured JSON Enforced Response
         if request.structured_json or "json" in query_lower:
             return json.dumps(
                 {
-                    "status": "success",
-                    "model_used": request.model,
-                    "query_analyzed": user_query,
-                    "insight": f"Analysis complete for prompt using open model '{request.model}'.",
-                    "confidence_score": 0.96,
+                    "analysis_title": f"Data Engineering Analysis for Prompt: '{user_query[:50]}...'",
+                    "model_executed": request.model,
+                    "pipeline_assessment": {
+                        "data_quality_score": 94.5,
+                        "schema_status": "VALIDATED",
+                        "detected_cardinality": "HIGH",
+                        "partition_strategy": "DATE_TRUNC(day, timestamp)",
+                        "recommended_cluster_keys": ["tenant_id", "created_at"]
+                    },
+                    "actionable_insights": [
+                        "Implement sliding window rate limiting on API endpoints to prevent backend latency spikes.",
+                        "Use Pydantic v2 strict models to catch schema drift before streaming data into Snowflake/Postgres.",
+                        "Ensure async connection pooling for all DB queries in FastAPI controllers."
+                    ],
+                    "query_optimization": {
+                        "execution_time_estimate_ms": 14.2,
+                        "cost_tier": "FREE_TIER_LOCAL",
+                        "confidence_score": 0.96
+                    }
                 },
                 indent=2,
             )
 
-        if "hello" in query_lower or "hi" in query_lower:
-            return f"Hello! I am {request.model}, running on your local containerized microservice. How can I assist you with AI workloads today?"
-        
-        if "capital" in query_lower and "france" in query_lower:
-            return "The capital of France is Paris."
-
-        if "code" in query_lower or "python" in query_lower:
+        # SQL / Data Engineering Prompts
+        if "sql" in query_lower or "query" in query_lower or "database" in query_lower or "postgres" in query_lower:
             return (
-                "Here is a fast Python snippet executed via local microservice:\n\n"
-                "```python\n"
-                "def calculate_ai_throughput(tokens: int, latency_sec: float) -> float:\n"
-                "    return tokens / latency_sec\n"
-                "```"
+                f"### 🛢️ {request.model} Optimized SQL Analysis\n\n"
+                f"Based on your data pipeline request: *\"{user_query}\"*\n\n"
+                "Here is the production-ready, indexed SQL query designed for high analytical throughput:\n\n"
+                "```sql\n"
+                "-- Production PostgreSQL / Snowflake ETL Query\n"
+                "WITH daily_aggregates AS (\n"
+                "    SELECT \n"
+                "        DATE_TRUNC('day', event_timestamp) AS event_date,\n"
+                "        tenant_id,\n"
+                "        COUNT(request_id) AS total_requests,\n"
+                "        SUM(tokens_used) AS total_tokens,\n"
+                "        AVG(latency_ms) AS avg_latency_ms\n"
+                "    FROM ai_usage_logs\n"
+                "    WHERE event_timestamp >= CURRENT_DATE - INTERVAL '30 days'\n"
+                "    GROUP BY 1, 2\n"
+                ")\n"
+                "SELECT \n"
+                "    event_date,\n"
+                "    tenant_id,\n"
+                "    total_requests,\n"
+                "    total_tokens,\n"
+                "    ROUND(avg_latency_ms::numeric, 2) AS avg_latency_ms,\n"
+                "    RANK() OVER (PARTITION BY event_date ORDER BY total_tokens DESC) AS token_rank\n"
+                "FROM daily_aggregates\n"
+                "ORDER BY event_date DESC, total_tokens DESC;\n"
+                "```\n\n"
+                "**Key Performance Highlights:**\n"
+                "1. **Partition Pruning**: Filtered on `event_timestamp` to scan only recent partition blocks.\n"
+                "2. **CTE Aggregation**: Isolates initial grouping before computing window functions, reducing memory footprint.\n"
+                "3. **Indexing Recommendation**: Create a composite index on `(event_timestamp, tenant_id)`."
             )
 
+        # Python / Data Pipeline / Code Prompts
+        if "code" in query_lower or "python" in query_lower or "fastapi" in query_lower or "pydantic" in query_lower:
+            return (
+                f"### 🐍 {request.model} Python Data Engineering Solution\n\n"
+                f"Here is a robust, strictly-typed Python solution using **Pydantic v2** and **AsyncIO**:\n\n"
+                "```python\n"
+                "import asyncio\n"
+                "from typing import List, Optional\n"
+                "from pydantic import BaseModel, Field, field_validator\n\n"
+                "class PipelineRecord(BaseModel):\n"
+                "    record_id: str = Field(..., description='Unique UUID of the stream event')\n"
+                "    tenant_id: str = Field(default='tenant-default')\n"
+                "    payload_bytes: int = Field(..., ge=1, description='Size of binary payload')\n"
+                "    status: str = Field(default='PENDING')\n\n"
+                "    @field_validator('status')\n"
+                "    @classmethod\n"
+                "    def validate_status(cls, v: str) -> str:\n"
+                "        allowed = {'PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'}\n"
+                "        if v.upper() not in allowed:\n"
+                "            raise ValueError(f'Invalid status {v}. Must be one of {allowed}')\n"
+                "        return v.upper()\n\n"
+                "async def process_batch(records: List[PipelineRecord]) -> dict:\n"
+                "    total_bytes = sum(r.payload_bytes for r in records)\n"
+                "    return {'processed_count': len(records), 'total_bytes': total_bytes}\n"
+                "```\n\n"
+                "**Implementation Details:**\n"
+                "- Enforces strict validation rules with Pydantic v2 `field_validator`.\n"
+                "- Asynchronous batch processor scales smoothly under heavy I/O workload."
+            )
+
+        # General / Architecture / Summarization Prompts
         return (
-            f"[{request.model} Local Response]\n"
-            f"Received user prompt: '{user_query}'.\n"
-            f"Execution parameters: temperature={request.temperature}, max_tokens={request.max_tokens}.\n"
-            f"Local inference complete with high fidelity output."
+            f"### ⚡ [{request.model} Open Model Response]\n\n"
+            f"**Query Addressed**: *\"{user_query}\"*\n\n"
+            "**Key Analysis & Insights:**\n"
+            "1. **Scalability**: Local open models eliminate third-party API token costs while maintaining zero data egress risks.\n"
+            "2. **Schema Integrity**: Pydantic v2 schemas act as an API contract guard between client microservices and data lake ingestion pipelines.\n"
+            "3. **Rate Control**: Dual-quota sliding window rate limiting (RPM/TPM) guarantees stable throughput during peak traffic spikes.\n\n"
+            f"*Execution Parameters: temperature={request.temperature}, max_tokens={request.max_tokens}, system_instruction='{system_instruction or 'Default'}'.*"
         )
 
     async def generate_completion(
@@ -180,7 +251,6 @@ class LLMServiceBoundary:
         generated_text: Optional[str] = None
         executed_backend = "local_mock"
 
-        # Check configured backend
         if settings.LLM_BACKEND == "ollama":
             generated_text = await self._execute_ollama(request, compiled_prompt)
             if generated_text:
@@ -191,7 +261,6 @@ class LLMServiceBoundary:
             if generated_text:
                 executed_backend = "huggingface"
 
-        # Fallback to local fast engine if external engine returned None or local_mock selected
         if not generated_text:
             generated_text = self._generate_local_fast_response(request)
             executed_backend = "local_fast_engine"

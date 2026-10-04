@@ -1,4 +1,4 @@
-# ⚡ AegisAI: Production FastAPI Microservice with Open Models & Enterprise Guardrails
+# ⚡ DataEngine AI: Production FastAPI Microservice with Open Models & Data Engineering Tools
 
 [![CI Pipeline](https://github.com/himishatunwal/fastapi-open-llm-service/actions/workflows/ci.yml/badge.svg)](https://github.com/himishatunwal/fastapi-open-llm-service/actions)
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://www.python.org/)
@@ -7,20 +7,24 @@
 [![uv](https://img.shields.io/badge/uv-packaging-purple.svg)](https://github.com/astral-sh/uv)
 [![Docker](https://img.shields.io/badge/Docker-Multi--stage-2496ED.svg)](https://www.docker.com/)
 
-A production-grade, containerized **FastAPI Microservice** designed for executing **Open Weights Language Models** (e.g. Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via free-tier API endpoints. Protected by **JWT Authentication**, **Role-Based Access Control (RBAC)**, strict **Pydantic v2 schema validation**, **AI-specific sliding-window rate controls**, an **Autonomous AI Security Agent**, and **Enterprise Structured Audit Logging**.
+A production-grade, containerized **FastAPI Microservice** designed for executing **Open Weights Language Models** (e.g. Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via free-tier API endpoints. Protected by **OAuth2 JWT Authentication**, **Role-Based Access Control (RBAC)**, strict **Pydantic v2 schema validation**, **AI-specific sliding-window rate controls**, an **Autonomous Data AI Agent**, and **Data Engineering Tool Executors**.
 
 ---
 
 ## 🌟 Key Features & Architecture
 
 - **Strict Typing & Pydantic v2 Validation**: End-to-end type safety using `Annotated`, `Field`, and custom Pydantic v2 validators.
-- **JWT Authentication & RBAC Guards**: OAuth2 Password Bearer flow with `bcrypt` password hashing, signed JWT tokens (`pyjwt`), multi-role RBAC (`admin`, `auditor`, `developer`, `user`), and runtime permission dependency guards (`PermissionChecker`).
-- **Autonomous AI Security Agent**: Goal-driven multi-tool workflow router (`/api/v1/agent/run`) that autonomously executes security scanners, threat intelligence lookups, and compliance audits before synthesizing LLM executive reports.
-- **Enterprise Security & Utility Tools**: Sandboxed tool registry supporting calculator, weather lookup, IP threat intelligence scanner, static code vulnerability scanner, and SOC2/HIPAA compliance evaluator.
-- **Enterprise Structured Audit Logging**: Memory audit logger tracking all authentication logins, permission decisions, model inferences, and tool executions with tenant isolation (`X-Tenant-ID`).
+- **JWT Authentication & RBAC Guards**: OAuth2 Password Bearer flow with `bcrypt` password hashing, signed JWT tokens (`pyjwt`), multi-role RBAC (`admin`, `data_engineer`, `analyst`, `user`), and runtime permission dependency guards (`PermissionChecker`).
+- **Autonomous Data AI Agent**: Goal-driven multi-tool workflow router (`/api/v1/agent/run`) that autonomously executes SQL query generators, schema validators, CSV dataset profilers, and document summarizers before synthesizing LLM executive reports.
+- **Data Engineering & AI Tools**: Sandboxed tool registry supporting:
+  - `sql_query_generator`: Generates optimized PostgreSQL, Snowflake, or BigQuery queries with window functions and partition filters.
+  - `data_schema_validator`: Validates raw JSON payloads for data quality, type correctness, and null rates.
+  - `csv_data_analyzer`: Profiles tabular data snippets for row counts, data types, and quality metrics.
+  - `text_summarizer`: Extracts intelligent executive summaries, bullet points, and action items.
+  - `calculator`: Sandboxed AST mathematical and metric formula evaluator.
 - **AI-Specific Rate & Usage Controls**: Sliding-window memory tracker enforcing dual quotas for **Requests per Minute (RPM)** and **Tokens per Minute (TPM)** per user.
-- **Flexible Open Model Inference Engine**: Runs fast local inference simulation out-of-the-box, with built-in connection adapters for **Ollama** (`http://localhost:11434`), **HuggingFace Inference API**, and **OpenRouter**.
-- **Interactive Streamlit Web Dashboard**: User-friendly UI (`streamlit_app.py`) featuring an RBAC quick role-switcher, open model chat playground, prompt template registry, autonomous agent executor, tool sandbox, audit log viewer, and live quota metrics.
+- **Flexible Open Model Inference Engine**: Runs fast local inference simulation out-of-the-box, generating context-aware SQL queries, Python Pydantic v2 code, and rich structured JSON outputs. Built-in connection adapters for **Ollama** (`http://localhost:11434`) and **HuggingFace Inference API**.
+- **Interactive Streamlit Web Dashboard**: User-friendly UI (`streamlit_app.py`) featuring 1-click preset role login, open model prompt lab, autonomous data agent executor, tool sandbox, and live quota metrics.
 - **Production Engineering Toolchain**: Pre-configured with `uv` package management, multi-stage `Dockerfile`, `docker-compose.yml`, `ruff` linter, `mypy` type checker, and GitHub Actions CI workflow.
 
 ---
@@ -45,7 +49,7 @@ Week 2 Assignment/
 │   ├── config.py                  # Pydantic v2 Settings configuration
 │   ├── api/                       # Versioned API Router (/api/v1)
 │   │   ├── router.py              # Main API router assembly
-│   │   └── v1/                    # API v1 routes (auth, chat, agent, tools, prompts, models, audit)
+│   │   └── v1/                    # API v1 routes (auth, chat, agent, tools, prompts, models)
 │   ├── core/                      # Security, JWT, RBAC Guards, Custom Exceptions
 │   │   ├── rbac.py                # Roles, Permissions & PermissionChecker Dependency
 │   │   ├── security.py            # Bcrypt hashing & JWT signing
@@ -53,19 +57,17 @@ Week 2 Assignment/
 │   ├── models/                    # Pydantic v2 Schemas (Auth, Chat, Tools)
 │   └── services/                  # Business Logic Services
 │       ├── auth_service.py        # RBAC user management & authentication
-│       ├── llm_service.py         # Open model inference boundary
-│       ├── tool_service.py        # Sandboxed tool execution registry
-│       ├── prompt_service.py      # Prompt template registry
-│       ├── audit_service.py       # Enterprise structured audit logger
+│       ├── llm_service.py         # Open model inference boundary & SQL/Python response generator
+│       ├── tool_service.py        # Sandboxed Data Engineering tool execution registry
+│       ├── prompt_service.py      # Prompt template registry (SQL, Data Quality, Async Python)
 │       └── rate_limiter.py        # Sliding-window RPM/TPM usage controller
 ├── streamlit_app.py               # Interactive Streamlit Web UI Dashboard
 ├── tests/                         # Automated Pytest Suite
 │   ├── conftest.py                # Pytest async fixtures
 │   ├── test_auth.py               # Auth & JWT endpoint tests
 │   ├── test_chat.py               # Chat completion & prompt template tests
-│   ├── test_agent.py              # Autonomous agent workflow tests
-│   ├── test_audit.py              # Audit logs & RBAC permission tests
-│   ├── test_tools.py              # Tool execution tests
+│   ├── test_agent.py              # Autonomous data agent workflow tests
+│   ├── test_tools.py              # Data tool execution tests
 │   └── test_rate_limiter.py       # Sliding window rate limiter tests
 └── docs/                          # Technical Architecture & Demo Documentation
     ├── architecture.md            # Technical Architecture with Mermaid diagrams
@@ -83,36 +85,24 @@ Week 2 Assignment/
 
 ---
 
-### Option 1: Running Locally (Fastest)
+### Running Locally (Fastest)
 
-1. **Clone the Repository & Set up Virtual Environment**:
+1. **Activate Virtual Environment & Install Dependencies**:
    ```bash
-   git clone https://github.com/himishatunwal/fastapi-open-llm-service.git
-   cd fastapi-open-llm-service
-
    python3 -m venv .venv
    source .venv/bin/activate
-   ```
-
-2. **Install Dependencies via `uv` / `pip`**:
-   ```bash
    pip install uv
    uv pip install -e ".[dev]" pydantic-settings email-validator python-multipart
    ```
 
-3. **Configure Environment Variables**:
-   ```bash
-   cp .env.example .env
-   ```
-
-4. **Launch the FastAPI Microservice**:
+2. **Launch the FastAPI Microservice**:
    ```bash
    PYTHONPATH=. uvicorn app.main:app --reload --port 8000
    ```
    - OpenAPI Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
    - Microservice Health Check: [http://localhost:8000/health](http://localhost:8000/health)
 
-5. **Launch the Streamlit Dashboard** (in a separate terminal window):
+3. **Launch the Streamlit Dashboard** (in a separate terminal window):
    ```bash
    source .venv/bin/activate
    streamlit run streamlit_app.py
@@ -121,67 +111,23 @@ Week 2 Assignment/
 
 ---
 
-### Option 2: Running with Docker Compose
+## 🔑 Pre-seeded Bootcamp Demo Credentials
 
-Run both the FastAPI microservice and Streamlit dashboard in isolated containers:
-
-```bash
-docker compose up --build
-```
-
-- **FastAPI API Server**: `http://localhost:8000`
-- **Streamlit Web Dashboard**: `http://localhost:8501`
+| Role | Username | Password | Granted Permissions |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin_user` | `admin123` | `admin:all`, `chat:infer`, `tools:execute`, `metrics:read` |
+| **Data Engineer** | `data_eng_user` | `data123` | `chat:infer`, `tools:execute`, `metrics:read`, `policy:evaluate` |
+| **Analyst** | `analyst_user` | `analyst123` | `chat:infer`, `tools:execute`, `metrics:read`, `models:read` |
+| **User** | `demo_user` | `demo123` | `chat:infer`, `tools:execute`, `models:read` |
 
 ---
 
-## 🧪 Automated Testing & Code Quality
-
-Run the complete test suite with coverage:
+## 🧪 Automated Testing
 
 ```bash
 source .venv/bin/activate
 PYTHONPATH=. pytest tests/ -v
 ```
-
-Run linter & static type checks:
-
-```bash
-ruff check app tests
-mypy app
-```
-
----
-
-## 🔑 Pre-seeded Bootcamp Demo Credentials
-
-For quick evaluation and Loom video demo testing, pre-seeded accounts across all RBAC roles are available:
-
-| Role | Username | Password | Granted Permissions |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin_user` | `admin123` | `admin:all`, `chat:infer`, `tools:execute`, `audit:read`, `metrics:read` |
-| **Auditor** | `auditor_user` | `audit123` | `audit:read`, `metrics:read`, `chat:infer`, `tools:execute`, `policy:evaluate` |
-| **Developer** | `dev_user` | `dev123` | `chat:infer`, `tools:execute`, `metrics:read`, `models:read` |
-| **User** | `demo_user` | `demo123` | `chat:infer`, `tools:execute`, `models:read` |
-
----
-
-## 📚 Curriculum Topic Mapping (Days 5 - 10)
-
-| Curriculum Day | Topic / Skill | Implementation in Repository |
-| :--- | :--- | :--- |
-| **Day 5** | RBAC, Roles & Permissions | Multi-role enum, permission map, and `PermissionChecker` guard in [`app/core/rbac.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/core/rbac.py) |
-| **Day 5** | Tenant Isolation & Audit Logs | `X-Tenant-ID` header handling & structured audit logger in [`app/services/audit_service.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/services/audit_service.py) |
-| **Day 5** | Observability & Health Checks | Health endpoint `/health`, usage metrics `/auth/me`, and audit trail `/api/v1/audit-logs` |
-| **Day 6** | Strict Typing & Pydantic v2 | End-to-end Python type hints, `pydantic.BaseModel`, `Field`, `EmailStr` in [`app/models/`](file:///Users/himishatunwal/Week%202%20Assignment/app/models) |
-| **Day 6** | `uv` Packaging & Streamlit | Configured [`pyproject.toml`](file:///Users/himishatunwal/Week%202%20Assignment/pyproject.toml) & dashboard [`streamlit_app.py`](file:///Users/himishatunwal/Week%202%20Assignment/streamlit_app.py) |
-| **Day 7** | FastAPI Dependency Injection | Custom [`Depends()`](file:///Users/himishatunwal/Week%202%20Assignment/app/api/v1/auth.py) for auth, settings, RBAC guards |
-| **Day 7** | JWT Auth & Service Boundaries | OAuth2 bearer tokens in [`app/core/security.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/core/security.py), decoupled [`app/services/llm_service.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/services/llm_service.py) |
-| **Day 7** | AI Rate & Usage Controls | Sliding window RPM/TPM limiter in [`app/services/rate_limiter.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/services/rate_limiter.py) |
-| **Day 8** | Dockerization & Multi-stage | Multi-stage [`Dockerfile`](file:///Users/himishatunwal/Week%202%20Assignment/Dockerfile) & [`docker-compose.yml`](file:///Users/himishatunwal/Week%202%20Assignment/docker-compose.yml) |
-| **Day 8** | GitHub Actions CI & Pre-commit | Automated workflow in [`.github/workflows/ci.yml`](file:///Users/himishatunwal/Week%202%20Assignment/.github/workflows/ci.yml) & [`.pre-commit-config.yaml`](file:///Users/himishatunwal/Week%202%20Assignment/.pre-commit-config.yaml) |
-| **Day 9** | Prompt Engineering | Prompt template registry in [`app/services/prompt_service.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/services/prompt_service.py) |
-| **Day 10** | Fast Inference & Tool Calling | Fast open model execution & security tools in [`app/services/tool_service.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/services/tool_service.py) |
-| **Day 10** | Autonomous AI Agent | Multi-step agent executor in [`app/api/v1/agent.py`](file:///Users/himishatunwal/Week%202%20Assignment/app/api/v1/agent.py) |
 
 ---
 

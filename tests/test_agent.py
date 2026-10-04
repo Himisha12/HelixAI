@@ -9,7 +9,7 @@ async def test_run_autonomous_agent(async_client: AsyncClient, auth_headers: Dic
         "/api/v1/agent/run",
         headers=auth_headers,
         json={
-            "task_description": "Scan IP address 45.33.32.156 for threat intelligence and evaluate risk.",
+            "task_description": "Generate top revenue customer SQL query in Postgres and validate JSON schema.",
             "model": "llama3-open-8b",
         },
     )
@@ -17,5 +17,5 @@ async def test_run_autonomous_agent(async_client: AsyncClient, auth_headers: Dic
     data = response.json()
     assert data["status"] == "COMPLETED"
     assert len(data["steps"]) >= 1
-    assert data["steps"][0]["tool_name"] == "ip_threat_lookup"
+    assert data["steps"][0]["tool_name"] == "sql_query_generator"
     assert "final_synthesis" in data
