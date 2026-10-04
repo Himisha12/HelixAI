@@ -1,4 +1,4 @@
-# ⚡ DataEngine AI: Production FastAPI Microservice with Open Models & Data Engineering Tools
+# ⚡ HelixAI: Production FastAPI Microservice with Open Models & Data Engineering Tools
 
 [![CI Pipeline](https://github.com/himishatunwal/fastapi-open-llm-service/actions/workflows/ci.yml/badge.svg)](https://github.com/himishatunwal/fastapi-open-llm-service/actions)
 [![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11-blue.svg)](https://www.python.org/)
@@ -8,6 +8,12 @@
 [![Docker](https://img.shields.io/badge/Docker-Multi--stage-2496ED.svg)](https://www.docker.com/)
 
 A production-grade, containerized **FastAPI Microservice** designed for executing **Open Weights Language Models** (e.g. Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via free-tier API endpoints. Protected by **OAuth2 JWT Authentication**, **Role-Based Access Control (RBAC)**, strict **Pydantic v2 schema validation**, **AI-specific sliding-window rate controls**, an **Autonomous Data AI Agent**, and **Data Engineering Tool Executors**.
+
+---
+
+## 🏗️ System Architecture
+
+![HelixAI System Architecture](docs/architecture_diagram.jpg)
 
 ---
 

@@ -7,6 +7,10 @@
 
 ## 🏗️ System Architecture Diagram
 
+![HelixAI Enterprise Microservice Architecture](architecture_diagram.jpg)
+
+### 📊 Interactive Mermaid Flowchart Code
+
 ```mermaid
 graph TD
     %% Client Layer
