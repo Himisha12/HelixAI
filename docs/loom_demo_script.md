@@ -62,17 +62,21 @@ Pacing: Energetic, clear, professional Data & AI Engineer tone
 
 ---
 
-### 🔵 0:45 – 1:30 | Section 2: 1-Click Preset Auth, RBAC & Token Rate Limits
+### 🔵 0:45 – 1:30 | Section 2: OAuth2 JWT Login, 1-Click Role Switcher & Token Quotas
 * **On-Screen Action**:
-  - Point to the top **1-Click Preset Auth** dropdown in the header.
-  - Switch from **`Data Engineer (engineer_dev)`** to **`Analyst (analyst_user)`** and then **`Admin (admin_user)`**.
-  - Show the live **Raw JWT Access Token** container expanding and the dynamic **TPM Limit Adjuster** slider moving from `10,000` to `25,000`.
+  1. Start on the **Dedicated Login Page**. Select **`Data Engineer (data_eng_user)`** in the account role dropdown.
+  2. Point to the **JWT Token & Header Inspector** on the right displaying the raw signed token, decoded claims payload, and Bearer header.
+  3. Click **🚀 Sign In & Issue JWT Access Token** to enter the main workspace console.
+  4. In the top header bar, point to **🔄 Switch Active Role (1-Click)** and switch between `Data Engineer`, `Analyst`, and `Admin`.
+  5. Open **Tab 4: System Governance** and adjust the **Token Quota Adjuster** slider from `10,000` to `25,000` TPM.
 * **Spoken Speech**:
-  > *"At the very top of our interface, notice our 1-Click Preset Auth dropdown. This allows data engineers and security auditors to instantly switch between active roles — Admin, Analyst, Data Engineer, and standard User.*
+  > *"When users first visit HelixAI, they land on our dedicated OAuth2 Authentication Gateway. Here, credentials are verified using bcrypt password hashing, issuing signed OAuth2 JWT access tokens.*
   > 
-  > *When I switch roles, HelixAI instantly generates a cryptographically signed OAuth2 JWT access token using bcrypt hashed credentials. Below, you can inspect the live decoded JWT payload showing user ID, granted permissions, and token expiry.*
+  > *On the right, notice our live JWT Inspector. It displays the raw issued token, decoded header claims payload, and the outgoing HTTP Authorization Bearer header.*
   > 
-  > *Notice our dynamic Token Quota Adjuster. Administrators can scale tenant rate limits on the fly — for instance, bumping the sliding-window ceiling from 10,000 to 25,000 Tokens Per Minute to handle heavy batch ETL workloads."*
+  > *I'll select 'Data Engineer' and sign in. Now inside our workspace console, notice our top toolbar's 1-Click Role Switcher. Data engineers and auditors can instantly switch between active roles — Admin, Analyst, Data Engineer, or User — on the fly.*
+  > 
+  > *Finally, in Tab 4, administrators can adjust dynamic token rate limits in real-time — scaling the sliding-window quota from 10,000 to 25,000 Tokens Per Minute to support heavy batch ETL workloads."*
 
 ---
 
