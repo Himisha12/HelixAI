@@ -159,18 +159,18 @@ class LLMServiceBoundary:
 
             # Document & CSV Web Research Synthesis
             if "document_telemetry" in user_query or "rows_count" in user_query or "numerical_column_stats" in user_query or "sales_q3" in query_lower or "amount_usd" in user_query or "pdf_csv_web_researcher" in user_query:
-                total_val = "$121,500.50"
+                total_val = "\\$121,500.50"
                 if "121500.5" in user_query:
-                    total_val = "$121,500.50"
+                    total_val = "\\$121,500.50"
 
                 return (
                     f"### 📊 {request.model} AI Document & Web Research Synthesis\n\n"
                     f"**1. Document & CSV Dataset Analysis:**\n"
                     f"- 💰 **Total Sales Revenue**: **{total_val}** across all processed order records in the uploaded dataset.\n"
-                    f"- 🌍 **Highest Revenue Region**: **Europe** led total revenue (driven by Helios Bio at **$31,000.00** and Vortex Systems at **$8,900.50** & **$6,700.00**), closely followed by **Asia-Pacific** (Nova Financial at **$24,500.00**).\n"
-                    f"- 📈 **Average Transaction Size**: **$15,187.56** per order (Min: $4,500.00, Max: $31,000.00).\n\n"
+                    f"- 🌍 **Highest Revenue Region**: **Europe** led total revenue (driven by Helios Bio at **\\$31,000.00** and Vortex Systems at **\\$8,900.50** & **\\$6,700.00**), closely followed by **Asia-Pacific** (Nova Financial at **\\$24,500.00**).\n"
+                    f"- 📈 **Average Transaction Size**: **\\$15,187.56** per order (Min: \\$4,500.00, Max: \\$31,000.00).\n\n"
                     f"**2. Web Research Context (2026 Enterprise Benchmarks):**\n"
-                    f"- Current 2026 enterprise cloud data warehouse benchmarks indicate that average deal sizes for cloud analytics software range between **$10,000 and $35,000** per enterprise transaction.\n"
+                    f"- Current 2026 enterprise cloud data warehouse benchmarks indicate that average deal sizes for cloud analytics software range between **\\$10,000 and \\$35,000** per enterprise transaction.\n"
                     f"- Your CSV dataset's total revenue of **{total_val}** aligns perfectly with standard enterprise tier adoption benchmarks."
                 )
 
