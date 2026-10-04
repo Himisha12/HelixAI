@@ -7,6 +7,7 @@ import re
 import urllib.parse
 from typing import Any, Callable, Dict, List, Optional
 import httpx
+from app.services.document_analyzer import _tokens, analyze_document, build_grounded_answer
 from app.models.tools import (
     ToolDefinition,
     ToolExecutionRequest,
@@ -137,9 +138,14 @@ class ToolService:
         return self._tools.get(name)
 
     def _perform_web_search_fallback(self, query: str) -> List[Dict[str, str]]:
-        """Perform lightweight web research query via DuckDuckGo API."""
+        """Perform lightweight web research via the DuckDuckGo Instant Answer API.
+
+        Returns an empty list when nothing is found -- results are never fabricated.
+        """
+        # The Instant Answer API works best with short keyword queries
+        short_query = " ".join(_tokens(query)[:6]) or query
         try:
-            url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(query)}&format=json&no_html=1"
+            url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(short_query)}&format=json&no_html=1"
             with httpx.Client(timeout=3.0) as client:
                 resp = client.get(url)
                 if resp.status_code == 200:
@@ -157,14 +163,7 @@ class ToolService:
                         return related
         except Exception:
             pass
-
-        # Fallback web research knowledge snippet
-        return [
-            {
-                "title": f"Web Research Context for '{query}'",
-                "snippet": f"Public benchmark data indicates optimal cloud data warehouse practices for {query}.",
-            }
-        ]
+        return []
 
     def execute_tool(self, request: ToolExecutionRequest) -> ToolExecutionResponse:
         tool_name = request.tool_name
@@ -195,44 +194,10 @@ class ToolService:
                         error="Document content or question required.",
                     )
 
-                doc_insights: Dict[str, Any] = {}
-                # If CSV content detected
-                if content and ("," in content.split("\n")[0] or "\n" in content):
-                    try:
-                        reader = csv.reader(io.StringIO(content))
-                        rows = [r for r in reader if r]
-                        if rows:
-                            headers = [h.strip() for h in rows[0]]
-                            data_rows = rows[1:]
+                # Compute the answer from the actual file content + question
+                doc_analysis = analyze_document(content, question)
 
-                            num_cols = {}
-                            for idx, h in enumerate(headers):
-                                vals = []
-                                for row in data_rows:
-                                    if idx < len(row):
-                                        v_str = row[idx].replace("$", "").replace(",", "").strip()
-                                        try:
-                                            vals.append(float(v_str))
-                                        except ValueError:
-                                            pass
-                                if len(vals) == len(data_rows) and len(vals) > 0:
-                                    num_cols[h] = {
-                                        "max": max(vals),
-                                        "min": min(vals),
-                                        "avg": round(sum(vals) / len(vals), 2),
-                                        "total": round(sum(vals), 2),
-                                    }
-
-                            doc_insights = {
-                                "rows_count": len(data_rows),
-                                "columns": headers,
-                                "numerical_column_stats": num_cols,
-                            }
-                    except Exception:
-                        doc_insights = {"plain_text_length": len(content)}
-
-                # Perform Web Research if enabled
-                web_results = []
+                web_results: List[Dict[str, str]] = []
                 if enable_web and question:
                     web_results = self._perform_web_search_fallback(question)
 
@@ -241,8 +206,11 @@ class ToolService:
                     status="success",
                     result={
                         "user_question": question,
-                        "document_telemetry": doc_insights,
+                        "document_telemetry": doc_analysis,
                         "web_research_sources": web_results,
+                        "grounded_answer": build_grounded_answer(
+                            doc_analysis, web_results, enable_web
+                        ),
                         "synthesis_ready": True,
                     },
                 )

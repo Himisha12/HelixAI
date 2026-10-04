@@ -1,19 +1,51 @@
 %PDF-1.4
-1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
-2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj
-3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<>/Contents 4 0 R>>endobj
-4 0 obj<</Length 285>>stream
-BT /Helvetica 12 Tf 50 700 Td (AegisAI Architecture Spec) Tj 50 670 Td (Data Engineering Microservice featuring Autonomous SQL AI Agent) Tj 50 640 Td (Supports PostgreSQL, Snowflake, BigQuery, and Document Web RAG) Tj 50 610 Td (Sliding window rate limit: 20 RPM / 10000 TPM) Tj ET
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+2 0 obj
+<</Type/Pages/Count 1/Kids[3 0 R]>>
+endobj
+3 0 obj
+<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<</Font<</F1 5 0 R>>>>/Contents 4 0 R>>
+endobj
+4 0 obj
+<</Length 1348>>stream
+BT
+/F1 10 Tf
+12 TL
+50 760 Td
+(AegisAI Microservice System Architecture Specification) Tj T*
+(==================================================) Tj T*
+() Tj T*
+(1. Overview) Tj T*
+(AegisAI is a production-grade FastAPI microservice tailored for Data & AI Engineering workloads.) Tj T*
+(It features autonomous tool calling, local open LLM inference \(Llama 3 8B, Mistral 7B\), JWT authentication,) Tj T*
+(multi-role RBAC \(Admin, Analyst, Data Engineer, User\), and sliding-window rate limiting.) Tj T*
+() Tj T*
+(2. Data Engineering Tool Matrix) Tj T*
+(- Autonomous SQL AI Agent: Converts natural language questions into dialect-aware SQL \(PostgreSQL, Snowflake, BigQuery\), validates DDL, and generates query optimization execution plans.) Tj T*
+(- AI Document & Web Researcher: Fuses uploaded CSV files, PDFs, or architectural text documents with real-time web search RAG for grounded Q&A.) Tj T*
+(- Schema Guard: Validates Pydantic v2 schemas and JSON structural integrity for microservice APIs.) Tj T*
+() Tj T*
+(3. Performance Benchmarks) Tj T*
+(- Sub-50ms token authentication and authorization verification.) Tj T*
+(- Dual-quota sliding window rate limits: 20 Requests Per Minute \(RPM\) and 10,000 Tokens Per Minute \(TPM\).) Tj T*
+(- 100% containerized deployment with multi-stage Docker build and automated CI via GitHub Actions.) Tj T*
+ET
 endstream
 endobj
+5 0 obj
+<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>
+endobj
 xref
-0 5
+0 6
 0000000000 65535 f 
-0000000010 00000 n 
-0000000059 00000 n 
-0000000114 00000 n 
-0000000219 00000 n 
-trailer<</Size 5/Root 1 0 R>>
+0000000009 00000 n 
+0000000054 00000 n 
+0000000105 00000 n 
+0000000217 00000 n 
+0000001614 00000 n 
+trailer<</Size 6/Root 1 0 R>>
 startxref
-555
+1677
 %%EOF

@@ -155,13 +155,26 @@ async def run_autonomous_agent(
             )
         )
 
+    # Grounded answer computed from the uploaded document (if the document tool ran)
+    grounded_answer = next(
+        (
+            s.output.get("grounded_answer")
+            for s in steps
+            if s.tool_name == "pdf_csv_web_researcher" and isinstance(s.output, dict)
+        ),
+        None,
+    )
+
     # Synthesize Final LLM Completion based on Autonomous Telemetry & Web Sources
     findings_str = "\n".join([f"Step {s.step_number} [{s.action}]: Tool '{s.tool_name}' output: {s.output}" for s in steps])
 
     prompt_messages = [
         ChatMessage(
             role="system",
-            content="You are an Enterprise AI Data Analyst & Web Researcher Agent. Synthesize tool telemetry and web search findings into a structured executive report.",
+            content=(
+                "You are an Enterprise AI Data Analyst & Web Researcher Agent. Answer ONLY from the "
+                "tool findings below. If a fact is not in the findings, say it was not found."
+            ),
         ),
         ChatMessage(
             role="user",
@@ -172,6 +185,12 @@ async def run_autonomous_agent(
     llm_resp = await llm_service.generate_completion(
         ChatCompletionRequest(model=request.model, messages=prompt_messages)
     )
+    final_text = llm_resp.choices[0].message.content
+
+    # Without a real model backend, return the answer computed directly from the file
+    # rather than templated text.
+    if grounded_answer and llm_resp.backend == "local_fast_engine":
+        final_text = grounded_answer
 
     elapsed_ms = round((time.time() - start_time) * 1000, 2)
 
@@ -179,6 +198,6 @@ async def run_autonomous_agent(
         task=task,
         status="COMPLETED",
         steps=steps,
-        final_synthesis=llm_resp.choices[0].message.content,
+        final_synthesis=final_text,
         execution_time_ms=elapsed_ms,
     )

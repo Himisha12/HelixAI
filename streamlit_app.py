@@ -430,7 +430,7 @@ with tab_doc_web:
                     f"{BASE_URL}/api/v1/agent/run",
                     headers=headers,
                     json={
-                        "task_description": f"Read document and perform web research: {user_q}",
+                        "task_description": user_q,
                         "document_payload": doc_text,
                         "enable_web_research": enable_web_search,
                         "model": "llama3-open-8b"
