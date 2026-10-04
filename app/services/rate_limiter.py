@@ -9,11 +9,16 @@ class AIRateLimiter:
     """
     AI-Specific Usage and Rate Controller implementing a sliding-window tracker
     for both Requests-per-Minute (RPM) and Tokens-per-Minute (TPM).
+    Supports dynamic token quota adjustment.
     """
 
     def __init__(self) -> None:
-        # Stores (timestamp, token_count) tuples for each user
         self._request_history: Dict[str, List[Tuple[float, int]]] = defaultdict(list)
+        self._custom_max_tpm: int = settings.RATE_LIMIT_TOKENS_PER_MINUTE
+
+    def update_tpm_limit(self, new_tpm: int) -> None:
+        """Dynamically adjust token-per-minute quota for testing rate controls."""
+        self._custom_max_tpm = max(100, new_tpm)
 
     def _clean_old_records(self, user_id: str, current_time: float) -> None:
         """Remove timestamps older than 60 seconds (sliding 1-minute window)."""
@@ -37,7 +42,7 @@ class AIRateLimiter:
         current_tpm = sum(tokens for _, tokens in history)
 
         max_rpm = settings.RATE_LIMIT_REQUESTS_PER_MINUTE
-        max_tpm = settings.RATE_LIMIT_TOKENS_PER_MINUTE
+        max_tpm = self._custom_max_tpm
 
         if current_rpm >= max_rpm:
             raise RateLimitExceededException(
@@ -63,7 +68,7 @@ class AIRateLimiter:
             "current_rpm": len(history),
             "max_rpm": settings.RATE_LIMIT_REQUESTS_PER_MINUTE,
             "current_tpm": sum(tokens for _, tokens in history),
-            "max_tpm": settings.RATE_LIMIT_TOKENS_PER_MINUTE,
+            "max_tpm": self._custom_max_tpm,
         }
 
 
