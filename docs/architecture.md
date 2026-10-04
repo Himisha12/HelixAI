@@ -1,7 +1,7 @@
 # HelixAI Architecture & Technical Documentation
 
 ## Overview
-**HelixAI** is a production-grade, containerized FastAPI microservice for executing **Open Weights Language Models** (Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via free-tier API endpoints. The microservice enforces strict data validation via **Pydantic v2**, secures endpoints with **JWT authentication**, implements **Role-Based Access Control (RBAC)**, tracks quotas with an **AI-specific sliding-window rate limiter**, executes an **Autonomous AI Agent**, and maintains an **Enterprise Structured Audit Logger**.
+**HelixAI** is a production-grade, containerized FastAPI microservice purpose-built for **Data & AI Engineering workloads**. It hosts **Open Weights Language Models** (Llama 3 8B, Mistral 7B, Phi-3 Mini) locally or via open API backends. The microservice enforces strict data validation via **Pydantic v2**, secures endpoints with **OAuth2 JWT authentication**, implements **Role-Based Access Control (RBAC)**, tracks quotas with an **AI-specific sliding-window rate limiter (RPM/TPM)**, executes **Autonomous SQL & Document RAG Agents**, and provides a Streamlit workspace.
 
 ---
 
@@ -9,46 +9,58 @@
 
 ```mermaid
 graph TD
-    Client[Client / Streamlit Dashboard UI] -->|HTTP POST /api/v1/auth/token| AuthRouter[Auth Router]
-    Client -->|HTTP GET /api/v1/models| ModelsRouter[Models Router]
-    Client -->|HTTP POST /api/v1/chat/completions + JWT| ChatRouter[Chat Completions Router]
-    Client -->|HTTP POST /api/v1/agent/run + JWT| AgentRouter[Autonomous Agent Router]
-    Client -->|HTTP POST /api/v1/tools/execute + JWT| ToolsRouter[Tools Router]
-    Client -->|HTTP GET /api/v1/audit-logs + JWT| AuditRouter[Audit Logs Router]
+    %% Client Layer
+    subgraph Client & Interface Layer
+        UI[Streamlit Dashboard UI :8501]
+        Swagger[FastAPI Swagger Docs :8000/docs]
+        HTTPClient[External Microservice HTTP Clients]
+    end
 
-    subgraph Security & Guard Layer
-        AuthRouter --> JWTService[JWT Token & Password Hashing]
-        ChatRouter --> AuthDep[JWT Auth Dependency]
-        AgentRouter --> AuthDep[JWT Auth Dependency]
-        ToolsRouter --> AuthDep[JWT Auth Dependency]
-        AuditRouter --> AuthDep[JWT Auth Dependency]
+    %% API Routing Layer
+    subgraph FastAPI Microservice API Gateway
+        UI & Swagger & HTTPClient -->|POST /api/v1/auth/token| AuthRouter[OAuth2 Auth Router]
+        UI & Swagger & HTTPClient -->|GET /api/v1/models| ModelsRouter[Models Router]
+        UI & Swagger & HTTPClient -->|POST /api/v1/chat/completions + JWT| ChatRouter[Chat Completions Router]
+        UI & Swagger & HTTPClient -->|POST /api/v1/agent/run + JWT| AgentRouter[Autonomous Agent Router]
+        UI & Swagger & HTTPClient -->|POST /api/v1/tools/execute + JWT| ToolsRouter[Tools Registry Router]
+    end
+
+    %% Security & Authorization Guard Layer
+    subgraph Security & RBAC Guard Boundary
+        AuthRouter --> BcryptJWT[Bcrypt Password Hashing & Signed JWT Issuer]
+        ChatRouter --> JWTAuth[JWT Auth Dependency Guard]
+        AgentRouter --> JWTAuth
+        ToolsRouter --> JWTAuth
         
-        AuthDep --> RBACGuard[RBAC PermissionChecker Guard]
-        RBACGuard --> RateLimiter[AI Sliding-Window Rate Limiter]
-        RBACGuard --> AuditLogger[Enterprise Structured Audit Logger]
+        JWTAuth --> RBACChecker[RBAC PermissionChecker Guard]
+        RBACChecker --> RateLimiter[AI Sliding-Window Rate Limiter (RPM / TPM)]
     end
 
+    %% Agent & Tool Service Boundary
     subgraph Service Boundaries
+        AgentRouter --> AgentExecutor[Autonomous Agent Routing Engine]
+        ToolsRouter --> ToolService[Tool Execution Service]
         ChatRouter --> LLMService[LLM Service Boundary]
-        AgentRouter --> AgentExecutor[Autonomous Agent Executor]
-        ToolsRouter --> ToolRegistry[Tool Execution Registry]
-        AgentExecutor --> ToolRegistry
+        
+        AgentExecutor --> ToolService
         AgentExecutor --> LLMService
+        ToolService --> GroundedAnalyzer[Grounded Document & CSV Analyzer]
     end
 
-    subgraph Open Inference Engines
-        LLMService --> LocalFastEngine[Local Fast Open Weights Engine]
+    %% Open Model Inference Engines
+    subgraph Open LLM Inference Layer
+        LLMService --> LocalFastEngine[Local Open Weights Fast Engine]
         LLMService --> Ollama[Local Ollama API :11434]
         LLMService --> HF[HuggingFace Free API]
     end
 
-    subgraph Sandboxed Tool Registry
-        ToolRegistry --> Calc[Calculator Tool]
-        ToolRegistry --> Weather[Weather Lookup Tool]
-        ToolRegistry --> IPThreat[IP Threat Scanner]
-        ToolRegistry --> VulnScan[Vulnerability Scanner]
-        ToolRegistry --> Compliance[SOC2/HIPAA Evaluator]
-        ToolRegistry --> SysInfo[System Info]
+    %% Sandboxed Tool Registry
+    subgraph Data & AI Engineering Tool Matrix
+        ToolService --> SQLTool[sql_data_analyst_tool: SQL Gen, Dialect Translation, DDL, Plan Optimizer]
+        ToolService --> DocTool[pdf_csv_web_researcher: CSV Data Analytics, PDF Q&A, Web Search RAG]
+        ToolService --> SchemaTool[data_schema_validator: Pydantic v2 & JSON Schema Quality]
+        ToolService --> TextTool[text_summarizer: Executive Text Compression]
+        ToolService --> CalcTool[calculator: Sandboxed Math AST Engine]
     end
 ```
 
@@ -56,32 +68,39 @@ graph TD
 
 ## 🚀 Key Architectural Layers
 
-### 1. Strict Typing & Pydantic v2 Schema Validation
-- All request payloads (`ChatCompletionRequest`, `UserCreate`, `ToolExecutionRequest`, `AgentRunRequest`) and response contracts (`ChatCompletionResponse`, `UserResponse`, `Token`, `AgentRunResponse`) strictly extend Pydantic v2 `BaseModel`.
-- Configured with `ConfigDict(from_attributes=True)` and strict type annotations (`Annotated`, `Field`, `EmailStr`).
+### 1. OAuth2 JWT Authentication & Multi-Role RBAC Guard
+- **Authentication**: OAuth2 password flow with bcrypt password hashing (`passlib`/`bcrypt`). Issues signed PyJWT access tokens containing user ID, role claims, and expiration.
+- **RBAC Roles**: 4 granular role levels:
+  - **Admin (`admin_user`)**: Full system access, dynamic rate limit adjustments, tool execution, and raw JWT inspections.
+  - **Data Engineer (`data_eng_user`)**: Access to SQL agent, dialect translation, and schema validation tools.
+  - **Analyst (`analyst_user`)**: Access to document Q&A, CSV analytics, web research, and analytical reporting.
+  - **User (`demo_user`)**: Standard model inference access.
+- **Runtime Enforcers**: Enforced at the route level via FastAPI `PermissionChecker(Permission.XXX)` dependency guards.
 
-### 2. Multi-Role RBAC & Security Guards
-- Roles: `admin`, `auditor`, `developer`, `user`.
-- Fine-grained permissions: `chat:infer`, `tools:execute`, `audit:read`, `metrics:read`, `models:read`, `admin:all`, `policy:evaluate`.
-- Enforced at runtime using FastAPI `PermissionChecker(Permission.XXX)` dependency guards.
-
-### 3. Tenant Isolation & Enterprise Audit Logging
-- Tenant context passed via `X-Tenant-ID` header.
-- Structured Audit Logger (`AuditLogger`) records authentication attempts, authorization decisions, LLM inferences, and tool executions with timestamps and user metadata.
-
-### 4. AI-Specific Rate & Usage Controls
-- Sliding-window memory tracker enforcing dual quotas:
-  - **RPM (Requests per Minute)**: Default cap of 20 req/min per user.
-  - **TPM (Tokens per Minute)**: Default cap of 10,000 tokens/min per user.
+### 2. Dual-Quota Sliding Window Rate Limiter
+- Memory-efficient sliding-window rate tracker enforcing dual quotas per user:
+  - **RPM (Requests Per Minute)**: Default limit of 20 req/min per user.
+  - **TPM (Tokens Per Minute)**: Base limit of 10,000 tokens/min per user.
+- **Dynamic Quota Adjustment**: Administrators can adjust tenant TPM limits on the fly (e.g. `10,000` $\rightarrow$ `25,000` TPM) to support heavy batch ETL workloads.
 - Emits HTTP `429 Too Many Requests` status with `Retry-After: 60` headers when exceeded.
 
-### 5. Autonomous Multi-Tool AI Agent
-- Evaluates user goal prompts, dynamically routes tasks to relevant tools (`ip_threat_lookup`, `vulnerability_scanner`, `compliance_evaluator`, `calculator`), and passes collected evidence to open LLMs for final report synthesis.
+### 3. Autonomous AI Data Analyst & Web Researcher Agent
+- **Task Routing**: Autonomous multi-tool orchestration for natural language goal prompts:
+  - **SQL Generation & Translation**: Generates dialect-aware SQL (PostgreSQL, Snowflake, BigQuery), validates DDL schemas, and generates execution plans.
+  - **Document & CSV RAG**: Grounded CSV parsing (`amount_usd`, `revenue`, `region` statistics), PDF/text passage extraction, and live DuckDuckGo web search synthesis.
+  - **Schema Validation**: Pydantic v2 JSON data quality and missing field analysis.
+
+### 4. Open Model Local Inference Boundary (`llm_service`)
+- Manages inference execution across local open-weights engines:
+  - **Meta Llama 3 8B (`llama3-open-8b`)**: Reasoning, tool calling, and SQL generation.
+  - **Mistral 7B (`mistral-7b-open`)**: Structured outputs and code generation.
+  - **Phi-3 Mini (`phi3-mini-open`)**: Low-latency edge summarization.
+- Supports local Ollama server integration (`:11434`), HuggingFace Inference API, and fast local simulation engine.
 
 ---
 
 ## 🛠️ Package Management & Production Toolchain
-- **`uv`**: Rapid dependency management via `pyproject.toml`.
-- **Ruff & Mypy**: Automated code quality linting and static type checking.
-- **GitHub Actions**: Continuous Integration pipeline checking linting, type safety, and unit test execution.
-- **Docker Multi-Stage Build**: Minified runtime container executed as non-root user (`appuser`).
+- **`uv`**: Rapid Python environment management via `pyproject.toml`.
+- **Pytest**: Automated test suite (**22 passing unit tests** covering auth, RBAC, agent routing, rate limiting, and grounded document analysis).
+- **Ruff & Mypy**: Automated code linting and static type checking.
+- **Docker & Docker Compose**: Multi-stage containerized deployment.
