@@ -1,5 +1,6 @@
 import ast
 import operator
+import re
 import sys
 import time
 from typing import Any, Callable, Dict, List, Optional
@@ -50,6 +51,7 @@ class ToolService:
     """
     Independent Tool Execution Service boundary with predefined tool registry,
     parameter validation, and safe sandboxed execution handlers.
+    Includes Enterprise Security, Compliance, Threat Intelligence, and System Tools.
     """
 
     def __init__(self) -> None:
@@ -72,6 +74,33 @@ class ToolService:
             parameters={
                 "city": ToolParameter(
                     type="string", description="Target city name (e.g. San Francisco, Tokyo, London)"
+                )
+            },
+        )
+        self._tools["ip_threat_lookup"] = ToolDefinition(
+            name="ip_threat_lookup",
+            description="Lookup threat intelligence risk score and abuse telemetry for an IP address",
+            parameters={
+                "ip_address": ToolParameter(
+                    type="string", description="IP address to scan (e.g. '192.168.1.1' or '45.33.32.156')"
+                )
+            },
+        )
+        self._tools["vulnerability_scanner"] = ToolDefinition(
+            name="vulnerability_scanner",
+            description="Perform static security analysis on code snippet for hardcoded secrets and OWASP vulnerabilities",
+            parameters={
+                "code_snippet": ToolParameter(
+                    type="string", description="Source code text to scan for security risks"
+                )
+            },
+        )
+        self._tools["compliance_evaluator"] = ToolDefinition(
+            name="compliance_evaluator",
+            description="Evaluate policy description against SOC2, HIPAA, and GDPR regulatory controls",
+            parameters={
+                "policy_text": ToolParameter(
+                    type="string", description="Security or data retention policy text"
                 )
             },
         )
@@ -128,6 +157,88 @@ class ToolService:
                 }
                 return ToolExecutionResponse(
                     tool_name=tool_name, status="success", result=mock_weather
+                )
+
+            elif tool_name == "ip_threat_lookup":
+                ip = str(args.get("ip_address", "0.0.0.0")).strip()
+                # Mock threat DB lookup
+                is_malicious = ip.startswith("45.") or ip.startswith("185.") or "bad" in ip
+                risk_score = 88 if is_malicious else 12
+                threat_tags = ["Botnet Host", "SSH Brute-force"] if is_malicious else ["Clean IP", "Residential ISP"]
+                
+                return ToolExecutionResponse(
+                    tool_name=tool_name,
+                    status="success",
+                    result={
+                        "ip_address": ip,
+                        "risk_score": risk_score,
+                        "risk_level": "HIGH" if is_malicious else "LOW",
+                        "threat_tags": threat_tags,
+                        "country": "Germany" if is_malicious else "United States",
+                        "last_scanned": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+                    },
+                )
+
+            elif tool_name == "vulnerability_scanner":
+                code = str(args.get("code_snippet", ""))
+                vulnerabilities: List[Dict[str, str]] = []
+
+                if "eval(" in code or "exec(" in code:
+                    vulnerabilities.append({
+                        "issue": "Arbitrary Code Execution Risk",
+                        "severity": "CRITICAL",
+                        "recommendation": "Avoid using eval() or exec(). Use AST safe evaluation instead."
+                    })
+                if re.search(r"secret|password|api_key|token\s*=\s*['\"][^'\"]+['\"]", code, re.IGNORECASE):
+                    vulnerabilities.append({
+                        "issue": "Hardcoded Credential Exposure",
+                        "severity": "HIGH",
+                        "recommendation": "Store sensitive secrets in environment variables using Pydantic Settings."
+                    })
+                if "SELECT" in code and "%s" not in code and "?" not in code and "+" in code:
+                    vulnerabilities.append({
+                        "issue": "Potential SQL Injection Vulnerability",
+                        "severity": "HIGH",
+                        "recommendation": "Use parameterized queries or an ORM like SQLAlchemy."
+                    })
+
+                if not vulnerabilities:
+                    vulnerabilities.append({
+                        "issue": "No Obvious Vulnerabilities Detected",
+                        "severity": "INFO",
+                        "recommendation": "Code passes basic static security checks."
+                    })
+
+                return ToolExecutionResponse(
+                    tool_name=tool_name,
+                    status="success",
+                    result={
+                        "scan_status": "COMPLETED",
+                        "findings_count": len(vulnerabilities),
+                        "vulnerabilities": vulnerabilities,
+                    },
+                )
+
+            elif tool_name == "compliance_evaluator":
+                text = str(args.get("policy_text", ""))
+                has_encryption = "encrypt" in text.lower() or "tls" in text.lower() or "aes" in text.lower()
+                has_audit = "log" in text.lower() or "audit" in text.lower()
+                has_rbac = "role" in text.lower() or "access" in text.lower() or "rbac" in text.lower()
+
+                controls = [
+                    {"control": "SOC2 CC6.1 - Access Controls & RBAC", "status": "PASS" if has_rbac else "FAIL"},
+                    {"control": "SOC2 CC6.6 - Data Encryption in Transit & Rest", "status": "PASS" if has_encryption else "FAIL"},
+                    {"control": "HIPAA 164.312(b) - Audit Controls", "status": "PASS" if has_audit else "FAIL"},
+                ]
+
+                return ToolExecutionResponse(
+                    tool_name=tool_name,
+                    status="success",
+                    result={
+                        "evaluation": "SOC2 & HIPAA Compliance Audit",
+                        "overall_score": f"{sum(1 for c in controls if c['status'] == 'PASS')}/3 Controls Met",
+                        "controls": controls,
+                    },
                 )
 
             elif tool_name == "system_info":

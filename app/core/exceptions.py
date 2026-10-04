@@ -19,6 +19,14 @@ class AuthenticationException(HTTPException):
         )
 
 
+class PermissionDeniedException(HTTPException):
+    def __init__(self, detail: str = "Permission denied for requested resource") -> None:
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail,
+        )
+
+
 class ModelExecutionException(HTTPException):
     def __init__(self, detail: str = "Error occurred during model execution") -> None:
         super().__init__(

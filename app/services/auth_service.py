@@ -1,5 +1,6 @@
 import uuid
-from typing import Dict, Optional
+from typing import Dict, List, Optional
+from app.core.rbac import Role
 from app.core.security import hash_password, verify_password
 from app.models.auth import UserCreate, UserInDB, UserResponse
 
@@ -8,27 +9,47 @@ class AuthService:
     """
     In-memory User Management & Authentication Service.
     In a full production database setup, this connects to PostgreSQL/MongoDB via SQLAlchemy/Beanie.
+    Pre-seeded with RBAC demo accounts (Admin, Auditor, Developer, User).
     """
 
     def __init__(self) -> None:
         self._users_db: Dict[str, UserInDB] = {}
-        # Pre-seed demo user for testing & video demo convenience
-        self._seed_demo_user()
+        # Pre-seed demo users across all roles for RBAC testing & Loom video demo
+        self._seed_demo_users()
 
-    def _seed_demo_user(self) -> None:
-        demo_id = "user-" + str(uuid.uuid4())[:8]
-        demo_user = UserInDB(
-            id=demo_id,
-            username="demo_user",
-            email="demo@ai-microservice.io",
-            role="user",
-            hashed_password=hash_password("demo123"),
-            is_active=True,
-        )
-        self._users_db["demo_user"] = demo_user
+    def _seed_demo_users(self) -> None:
+        demo_accounts = [
+            ("demo_user", "demo@ai-microservice.io", "demo123", Role.USER.value),
+            ("admin_user", "admin@ai-microservice.io", "admin123", Role.ADMIN.value),
+            ("auditor_user", "auditor@ai-microservice.io", "audit123", Role.AUDITOR.value),
+            ("dev_user", "dev@ai-microservice.io", "dev123", Role.DEVELOPER.value),
+        ]
+
+        for username, email, pwd, role in demo_accounts:
+            user_id = f"user-{username[:5]}-" + str(uuid.uuid4())[:6]
+            self._users_db[username] = UserInDB(
+                id=user_id,
+                username=username,
+                email=email,
+                role=role,
+                hashed_password=hash_password(pwd),
+                is_active=True,
+            )
 
     def get_user_by_username(self, username: str) -> Optional[UserInDB]:
         return self._users_db.get(username)
+
+    def list_users(self) -> List[UserResponse]:
+        return [
+            UserResponse(
+                id=u.id,
+                username=u.username,
+                email=u.email,
+                role=u.role,
+                is_active=u.is_active,
+            )
+            for u in self._users_db.values()
+        ]
 
     def register_user(self, user_create: UserCreate) -> UserResponse:
         if user_create.username in self._users_db:
@@ -41,7 +62,7 @@ class AuthService:
             id=user_id,
             username=user_create.username,
             email=user_create.email,
-            role=user_create.role,
+            role=user_create.role or Role.USER.value,
             hashed_password=hashed_pwd,
             is_active=True,
         )
