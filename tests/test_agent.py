@@ -17,5 +17,5 @@ async def test_run_autonomous_agent(async_client: AsyncClient, auth_headers: Dic
     data = response.json()
     assert data["status"] == "COMPLETED"
     assert len(data["steps"]) >= 1
-    assert data["steps"][0]["tool_name"] == "sql_query_generator"
+    assert data["steps"][0]["tool_name"] == "sql_agent_tool"
     assert "final_synthesis" in data

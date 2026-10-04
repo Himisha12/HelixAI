@@ -5,7 +5,7 @@ import streamlit as st
 
 # Page Configuration
 st.set_page_config(
-    page_title="DataEngine AI Studio",
+    page_title="SQL & Data AI Agent Command Console",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -28,7 +28,7 @@ st.markdown(
 
     .hero-container {
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
-        border: 1px solid rgba(56, 189, 248, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.2);
         border-radius: 16px;
         padding: 1.5rem 2rem;
         margin-bottom: 1.5rem;
@@ -64,7 +64,7 @@ st.markdown(
         margin-bottom: 0.5rem;
     }
     .card-val {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         font-weight: 700;
         color: #F8FAFC;
     }
@@ -108,7 +108,7 @@ st.markdown(
 
     .timeline-step {
         background: rgba(15, 23, 42, 0.8);
-        border-left: 3px solid #34D399;
+        border-left: 3px solid #38BDF8;
         border-radius: 0 8px 8px 0;
         padding: 1rem;
         margin-bottom: 0.75rem;
@@ -153,9 +153,9 @@ if "logged_in_role" not in st.session_state:
 st.markdown(
     """
     <div class="hero-container">
-        <div class="hero-title">⚡ DataEngine AI: Production Open LLM Studio</div>
+        <div class="hero-title">⚡ Autonomous SQL & Document AI Agent Studio</div>
         <div class="hero-subtitle">
-            FastAPI + Pydantic v2 + JWT Authentication + Sliding Window Rate Controls + Data Engineering Tool Execution
+            FastAPI + Pydantic v2 + SQL AI Agent + Document/CSV Q&A Reader + Sliding Window Rate Controls
         </div>
     </div>
     """,
@@ -163,7 +163,7 @@ st.markdown(
 )
 
 # Sidebar Control
-st.sidebar.markdown("### 🎛️ Control Center")
+st.sidebar.markdown("### 🎛️ Console Control")
 
 try:
     health_resp = requests.get(f"{BASE_URL}/health", timeout=2)
@@ -235,12 +235,13 @@ with col_s2:
         quick_auth("demo_user", "demo123")
 
 # Main Navigation Tabs
-tab_overview, tab_auth, tab_agent, tab_chat, tab_tools = st.tabs([
+tab_overview, tab_sql_agent, tab_doc_qa, tab_auth, tab_chat, tab_tools = st.tabs([
     "📊 1. Operations Overview",
-    "🔑 2. JWT Auth & RBAC",
-    "🤖 3. Autonomous Data AI Agent",
-    "💬 4. Open Model Inference Studio",
-    "🛠️ 5. Data Tools Sandbox",
+    "🛢️ 2. Autonomous SQL AI Agent",
+    "📄 3. Document & CSV Q&A Reader",
+    "🔑 4. JWT Auth & RBAC",
+    "💬 5. Open Model Inference Studio",
+    "🛠️ 6. Data Tools Sandbox",
 ])
 
 # ---------------------------------------------------------
@@ -254,7 +255,7 @@ with tab_overview:
         st.markdown(
             """
             <div class="glass-card">
-                <div class="card-title">Backend Framework</div>
+                <div class="card-title">Backend Architecture</div>
                 <div class="card-val" style="color:#38BDF8;">FastAPI + Pydantic v2</div>
             </div>
             """,
@@ -264,8 +265,8 @@ with tab_overview:
         st.markdown(
             """
             <div class="glass-card">
-                <div class="card-title">Authentication</div>
-                <div class="card-val" style="color:#A78BFA;">OAuth2 JWT + Bcrypt</div>
+                <div class="card-title">SQL Engine & Dialects</div>
+                <div class="card-val" style="color:#A78BFA;">Postgres / Snowflake / BigQuery</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -274,8 +275,8 @@ with tab_overview:
         st.markdown(
             """
             <div class="glass-card">
-                <div class="card-title">Supported Models</div>
-                <div class="card-val" style="color:#34D399;">Llama 3 / Mistral / Phi-3</div>
+                <div class="card-title">Document Intelligence</div>
+                <div class="card-val" style="color:#34D399;">CSV / PDF Document Q&A</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -284,8 +285,8 @@ with tab_overview:
         st.markdown(
             """
             <div class="glass-card">
-                <div class="card-title">Tooling Engine</div>
-                <div class="card-val" style="color:#FBBF24;">SQL / JSON / CSV Tools</div>
+                <div class="card-title">Open Models Support</div>
+                <div class="card-val" style="color:#FBBF24;">Llama 3 / Mistral / Phi-3</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -323,12 +324,145 @@ with tab_overview:
             st.error(f"Telemetry error: {e}")
 
 # ---------------------------------------------------------
-# Tab 2: JWT Auth & RBAC
+# Tab 2: Autonomous SQL AI Agent
+# ---------------------------------------------------------
+with tab_sql_agent:
+    st.subheader("Autonomous SQL AI Agent Workflow Studio")
+    st.write("The Autonomous SQL AI Agent generates complex analytical queries, translates across dialects (Postgres, Snowflake, BigQuery), generates DDL schemas, and explains execution plans.")
+    
+    if not st.session_state["jwt_token"]:
+        st.warning("⚠️ Please authenticate via sidebar buttons to use the SQL AI Agent.")
+    else:
+        sql_scenarios = {
+            "🛢️ Complex Analytical Query (PostgreSQL)": {
+                "prompt": "Generate top 10 revenue customers query in Postgres with quarterly DENSE_RANK window function and date truncation filter.",
+                "dialect": "postgres"
+            },
+            "🔄 SQL Dialect Translator (Postgres -> Snowflake)": {
+                "prompt": "Translate query to Snowflake SQL and convert date functions to DATEADD/DATE_TRUNC.",
+                "dialect": "snowflake"
+            },
+            "⚡ SQL Query Execution Plan & Optimization": {
+                "prompt": "Explain query execution plan for sales_orders table and suggest indexes to eliminate Sequential Scans.",
+                "dialect": "postgres"
+            },
+            "🏗️ Data Lake Table DDL Schema Generator": {
+                "prompt": "Generate CREATE TABLE DDL schema for analytics_events with primary key, tenant_id partition, JSONB payload, and composite indexes.",
+                "dialect": "bigquery"
+            },
+        }
+
+        sel_scenario = st.selectbox("Select SQL AI Agent Goal Scenario", list(sql_scenarios.keys()))
+        sql_prompt_in = st.text_area("SQL Agent Goal Prompt", value=sql_scenarios[sel_scenario]["prompt"], height=80)
+        
+        c_sql1, c_sql2 = st.columns(2)
+        with c_sql1:
+            sql_dialect_sel = st.selectbox("Target SQL Dialect", ["postgres", "snowflake", "bigquery", "spark"], index=0)
+        with c_sql2:
+            sql_model_sel = st.selectbox("LLM Inference Model", ["llama3-open-8b", "mistral-7b-open", "phi3-mini-open"], index=0)
+
+        if st.button("🚀 Run Autonomous SQL AI Agent"):
+            headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
+            with st.spinner("SQL AI Agent executing query synthesis, dialect translation, and plan evaluation..."):
+                try:
+                    resp = requests.post(
+                        f"{BASE_URL}/api/v1/agent/run",
+                        headers=headers,
+                        json={"task_description": f"{sql_prompt_in} (Dialect: {sql_dialect_sel})", "model": sql_model_sel},
+                    )
+                    if resp.status_code == 200:
+                        sdata = resp.json()
+                        st.success(f"SQL AI Agent Completed Task in {sdata.get('execution_time_ms')} ms!")
+                        
+                        st.markdown("#### ⚡ Autonomous Tool Steps Executed")
+                        for step in sdata.get("steps", []):
+                            st.markdown(
+                                f"""
+                                <div class="timeline-step">
+                                    <strong>Step {step['step_number']}: [{step['action']}] Tool <code>{step['tool_name']}</code></strong><br>
+                                    <span style="color:#94A3B8; font-size:0.85rem;">Arguments:</span> <code>{json.dumps(step['arguments'])}</code><br>
+                                    <span style="color:#94A3B8; font-size:0.85rem;">Output Result:</span>
+                                    <pre style="margin-top:4px; font-size:0.85rem; color:#38BDF8;">{json.dumps(step['output'], indent=2)}</pre>
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+
+                        st.markdown("#### 📋 SQL Agent Synthesis & Recommendations")
+                        st.info(sdata.get("final_synthesis"))
+                    else:
+                        st.error(f"SQL Agent Error ({resp.status_code}): {resp.json().get('detail')}")
+                except Exception as e:
+                    st.error(f"Execution error: {e}")
+
+# ---------------------------------------------------------
+# Tab 3: Document & CSV Q&A Reader
+# ---------------------------------------------------------
+with tab_doc_qa:
+    st.subheader("📄 Document & CSV Reader - Natural Language Q&A Engine")
+    st.write("Upload a CSV file, text document, or PDF text payload, ask ANY natural language question, and let the AI parse the dataset, compute statistics, and answer your question!")
+    
+    if not st.session_state["jwt_token"]:
+        st.warning("⚠️ Please authenticate via sidebar buttons to use Document Q&A.")
+    else:
+        uploaded_file = st.file_uploader("Upload Document (CSV, TXT, or PDF Text)", type=["csv", "txt", "log"])
+        
+        sample_csv_default = (
+            "id,customer_name,revenue,region,orders_count\n"
+            "101,Acme Corp,125000,US-East,45\n"
+            "102,Globex Systems,85000,US-West,32\n"
+            "103,Soylent Data,210000,EU-Central,78\n"
+            "104,Initech,45000,US-East,12\n"
+            "105,Umbrella Corp,310000,APAC,95"
+        )
+
+        doc_content_text = ""
+        if uploaded_file is not None:
+            try:
+                doc_content_text = uploaded_file.getvalue().decode("utf-8")
+                st.success(f"Uploaded file '{uploaded_file.name}' ({len(doc_content_text)} bytes) loaded successfully!")
+            except Exception as e:
+                st.error(f"File reading error: {e}")
+        else:
+            doc_content_text = st.text_area("Or Paste Document / CSV Data Content:", value=sample_csv_default, height=130)
+
+        user_doc_question = st.text_input("Ask ANY Question about the Document:", value="What is the total revenue and which customer has the highest revenue?")
+
+        if st.button("⚡ Analyze Document & Answer Question"):
+            headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
+            with st.spinner("Parsing document content and analyzing data..."):
+                try:
+                    resp = requests.post(
+                        f"{BASE_URL}/api/v1/agent/run",
+                        headers=headers,
+                        json={
+                            "task_description": f"Read document content and answer question: {user_doc_question}",
+                            "document_payload": doc_content_text,
+                            "model": "llama3-open-8b"
+                        },
+                    )
+                    if resp.status_code == 200:
+                        doc_res = resp.json()
+                        st.success("Document Analyzed Successfully!")
+                        
+                        st.markdown("#### 🔍 Extracted Data Telemetry & Direct Findings")
+                        for step in doc_res.get("steps", []):
+                            st.json(step["output"])
+
+                        st.markdown("#### 🤖 AI Answer & Detailed Synthesis")
+                        st.info(doc_res.get("final_synthesis"))
+                    else:
+                        st.error(f"Q&A Error ({resp.status_code}): {resp.json().get('detail')}")
+                except Exception as e:
+                    st.error(f"Error analyzing document: {e}")
+
+# ---------------------------------------------------------
+# Tab 4: JWT Auth & RBAC
 # ---------------------------------------------------------
 with tab_auth:
-    st.subheader("OAuth2 JWT Authentication & RBAC")
+    st.subheader("OAuth2 JWT Authentication & RBAC Governance")
     
-    st.markdown("#### 📋 Role Permission Matrix")
+    st.markdown("#### 📋 System Role Permission Matrix")
     matrix_data = [
         {"Role": "👑 ADMIN", "chat:infer": "✅ Yes", "tools:execute": "✅ Yes", "metrics:read": "✅ Yes", "policy:evaluate": "✅ Yes"},
         {"Role": "📊 DATA ENGINEER", "chat:infer": "✅ Yes", "tools:execute": "✅ Yes", "metrics:read": "✅ Yes", "policy:evaluate": "✅ Yes"},
@@ -371,62 +505,7 @@ with tab_auth:
                     st.error(f"Connection error: {e}")
 
 # ---------------------------------------------------------
-# Tab 3: Autonomous Data AI Agent
-# ---------------------------------------------------------
-with tab_agent:
-    st.subheader("Autonomous Multi-Tool Data Engineering Agent")
-    st.write("The Autonomous Agent evaluates data engineering goal prompts, routes execution to data tools (SQL generator, JSON validator, CSV analyzer), and synthesizes executive takeaways.")
-    
-    if not st.session_state["jwt_token"]:
-        st.warning("⚠️ Please authenticate to run the autonomous agent.")
-    else:
-        preset_scenarios = {
-            "🛢️ PostgreSQL Revenue Analytics Query": "Generate top 10 revenue customers query in Postgres with quarterly window function aggregation and validate payload schema.",
-            "📋 Data Schema Validation & Null Check": "Validate JSON dataset record schema and check for null values and missing fields.",
-            "📊 CSV Tabular Dataset Profiling": "Profile CSV dataset snippet to compute row counts, data types, and quality metrics: id,name,revenue\\n1,Alpha,5000\\n2,Beta,12000",
-            "🧮 Data Metric Calculation": "Calculate monthly throughput and cost metric: (125000 / 30) * 1.15",
-        }
-        
-        sel_preset = st.selectbox("Select Goal Scenario Preset", list(preset_scenarios.keys()))
-        task_input_text = st.text_area("Agent Goal Prompt", value=preset_scenarios[sel_preset], height=80)
-        sel_agent_model = st.selectbox("Model", ["llama3-open-8b", "mistral-7b-open", "phi3-mini-open"], index=0)
-
-        if st.button("🚀 Run Autonomous Agent"):
-            headers = {"Authorization": f"Bearer {st.session_state['jwt_token']}"}
-            with st.spinner("Agent evaluating task, invoking data tools, and synthesizing report..."):
-                try:
-                    resp = requests.post(
-                        f"{BASE_URL}/api/v1/agent/run",
-                        headers=headers,
-                        json={"task_description": task_input_text, "model": sel_agent_model},
-                    )
-                    if resp.status_code == 200:
-                        adata = resp.json()
-                        st.success(f"Autonomous Workflow Completed in {adata.get('execution_time_ms')} ms!")
-                        
-                        st.markdown("#### ⚡ Autonomous Tool Steps Executed")
-                        for step in adata.get("steps", []):
-                            st.markdown(
-                                f"""
-                                <div class="timeline-step">
-                                    <strong>Step {step['step_number']}: Executed Tool <code>{step['tool_name']}</code></strong><br>
-                                    <span style="color:#94A3B8; font-size:0.85rem;">Arguments:</span> <code>{json.dumps(step['arguments'])}</code><br>
-                                    <span style="color:#94A3B8; font-size:0.85rem;">Output Result:</span>
-                                    <pre style="margin-top:4px; font-size:0.85rem; color:#38BDF8;">{json.dumps(step['output'], indent=2)}</pre>
-                                </div>
-                                """,
-                                unsafe_allow_html=True,
-                            )
-
-                        st.markdown("#### 📋 Executive Analysis & Synthesis")
-                        st.info(adata.get("final_synthesis"))
-                    else:
-                        st.error(f"Agent Execution Error ({resp.status_code}): {resp.json().get('detail')}")
-                except Exception as e:
-                    st.error(f"Execution error: {e}")
-
-# ---------------------------------------------------------
-# Tab 4: Open Model Inference Studio
+# Tab 5: Open Model Inference Studio
 # ---------------------------------------------------------
 with tab_chat:
     st.subheader("Open Model Fast Inference & Prompt Lab")
@@ -501,7 +580,7 @@ with tab_chat:
                     st.error(f"Connection error: {e}")
 
 # ---------------------------------------------------------
-# Tab 5: Data Tools Sandbox
+# Tab 6: Data Tools Sandbox
 # ---------------------------------------------------------
 with tab_tools:
     st.subheader("Data & AI Engineering Tools Sandbox")
@@ -517,16 +596,16 @@ with tab_tools:
                 st.json(tools_list)
 
                 st.markdown("---")
-                st.markdown("#### Execute Sandboxed Data Tool")
+                st.markdown("#### Execute Sandboxed Tool")
                 selected_tname = st.selectbox("Choose Tool", [t["name"] for t in tools_list])
                 
-                default_arg_val = '{"data_request": "Top 5 customers by revenue", "dialect": "postgres"}'
-                if selected_tname == "data_schema_validator":
+                default_arg_val = '{"task": "generate", "prompt_or_query": "Top 5 revenue customers in Postgres", "dialect": "postgres"}'
+                if selected_tname == "pdf_csv_analyzer":
+                    default_arg_val = '{"document_content": "id,name,revenue\\n101,Acme,125000\\n102,Globex,85000", "question": "What is the total revenue?", "file_type": "csv"}'
+                elif selected_tname == "data_schema_validator":
                     default_arg_val = '{"json_payload": "{\\"id\\": 1, \\"user\\": \\"alice\\", \\"email\\": \\"alice@data.io\\"}"}'
-                elif selected_tname == "csv_data_analyzer":
-                    default_arg_val = '{"csv_text": "id,name,revenue\\n1,Alpha,5000\\n2,Beta,12000"}'
                 elif selected_tname == "text_summarizer":
-                    default_arg_val = '{"text": "Data engineering involves building pipelines to extract, transform, and load data at scale. Clean schema validation prevents downstream pipeline failures.", "style": "executive"}'
+                    default_arg_val = '{"text": "Data engineering involves building pipelines to extract, transform, and load data at scale.", "style": "executive"}'
                 elif selected_tname == "calculator":
                     default_arg_val = '{"expression": "125000 / 30 * 1.15"}'
 

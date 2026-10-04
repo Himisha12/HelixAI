@@ -11,23 +11,49 @@ async def test_list_tools(async_client: AsyncClient) -> None:
     assert isinstance(data, list)
     assert len(data) >= 5
     tool_names = [t["name"] for t in data]
-    assert "sql_query_generator" in tool_names
+    assert "pdf_csv_analyzer" in tool_names
+    assert "sql_agent_tool" in tool_names
     assert "data_schema_validator" in tool_names
-    assert "csv_data_analyzer" in tool_names
     assert "text_summarizer" in tool_names
     assert "calculator" in tool_names
 
 
 @pytest.mark.asyncio
-async def test_execute_sql_query_generator_tool(
+async def test_execute_pdf_csv_analyzer_tool(
     async_client: AsyncClient, auth_headers: Dict[str, str]
 ) -> None:
     response = await async_client.post(
         "/api/v1/tools/execute",
         headers=auth_headers,
         json={
-            "tool_name": "sql_query_generator",
-            "arguments": {"data_request": "Top 5 revenue customers in Postgres", "dialect": "postgres"},
+            "tool_name": "pdf_csv_analyzer",
+            "arguments": {
+                "document_content": "id,customer,revenue\n101,Acme,125000\n102,Globex,85000",
+                "question": "What is the total revenue?",
+                "file_type": "csv"
+            },
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["result"]["file_type"] == "csv"
+
+
+@pytest.mark.asyncio
+async def test_execute_sql_agent_tool(
+    async_client: AsyncClient, auth_headers: Dict[str, str]
+) -> None:
+    response = await async_client.post(
+        "/api/v1/tools/execute",
+        headers=auth_headers,
+        json={
+            "tool_name": "sql_agent_tool",
+            "arguments": {
+                "task": "generate",
+                "prompt_or_query": "Top 5 revenue customers in Postgres",
+                "dialect": "postgres"
+            },
         },
     )
     assert response.status_code == 200
