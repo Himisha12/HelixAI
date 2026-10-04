@@ -165,15 +165,13 @@ if "logged_in_user" not in st.session_state:
     st.session_state["logged_in_user"] = ""
 if "logged_in_role" not in st.session_state:
     st.session_state["logged_in_role"] = ""
-if "tenant_id" not in st.session_state:
-    st.session_state["tenant_id"] = "tenant-enterprise-01"
 
 def authenticate_user(username: str, pwd: str) -> bool:
     try:
         resp = requests.post(
             f"{BASE_URL}/api/v1/auth/token",
             data={"username": username, "password": pwd},
-            headers={"Content-Type": "application/x-www-form-urlencoded", "X-Tenant-ID": st.session_state["tenant_id"]},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         if resp.status_code == 200:
             tdata = resp.json()
@@ -219,10 +217,8 @@ if not st.session_state["jwt_token"]:
 
         input_user = st.text_input("Username", value=u_def)
         input_pass = st.text_input("Password", value=p_def, type="password")
-        tenant_input = st.text_input("Tenant Scope ID", value="tenant-enterprise-01")
 
         if st.button("🚀 Sign In & Issue JWT Access Token", use_container_width=True):
-            st.session_state["tenant_id"] = tenant_input
             if authenticate_user(input_user, input_pass):
                 st.success(f"JWT Token issued for {input_user}!")
                 st.rerun()
@@ -242,7 +238,7 @@ if not st.session_state["jwt_token"]:
             sample_resp = requests.post(
                 f"{BASE_URL}/api/v1/auth/token",
                 data={"username": sample_u, "password": sample_p},
-                headers={"Content-Type": "application/x-www-form-urlencoded", "X-Tenant-ID": tenant_input},
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
             if sample_resp.status_code == 200:
                 t_raw = sample_resp.json()["access_token"]
@@ -250,7 +246,6 @@ if not st.session_state["jwt_token"]:
                 st.markdown("#### 1. Raw Issued JWT Access Token")
                 st.code(t_raw, language="text")
 
-                # Decode JWT without verifying for UI inspection
                 decoded_header = jwt.get_unverified_header(t_raw)
                 decoded_payload = jwt.decode(t_raw, options={"verify_signature": False})
 
@@ -264,7 +259,7 @@ if not st.session_state["jwt_token"]:
                     st.json(decoded_payload)
 
                 st.markdown("#### 3. Outgoing HTTP Authorization Header")
-                st.code(f"Authorization: Bearer {t_raw}\nX-Tenant-ID: {tenant_input}", language="http")
+                st.code(f"Authorization: Bearer {t_raw}", language="http")
         except Exception:
             st.warning("Start FastAPI backend server on port 8000 to preview live JWT token decoding.")
         st.markdown('</div>', unsafe_allow_html=True)
@@ -319,7 +314,7 @@ with hdr_col3:
 st.markdown("---")
 
 # ---------------------------------------------------------
-# Core Navigation Tabs (Streamlined to 4 Tabs)
+# Core Navigation Tabs
 # ---------------------------------------------------------
 tab_analyst, tab_doc_web, tab_chat, tab_gov = st.tabs([
     "🤖 1. AI Data Analyst & SQL Agent",
