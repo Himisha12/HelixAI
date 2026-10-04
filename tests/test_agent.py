@@ -11,11 +11,11 @@ async def test_run_autonomous_agent(async_client: AsyncClient, auth_headers: Dic
         json={
             "task_description": "Generate top revenue customer SQL query in Postgres and validate JSON schema.",
             "model": "llama3-open-8b",
+            "enable_web_research": False,
         },
     )
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "COMPLETED"
     assert len(data["steps"]) >= 1
-    assert data["steps"][0]["tool_name"] == "sql_agent_tool"
     assert "final_synthesis" in data

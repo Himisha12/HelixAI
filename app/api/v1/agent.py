@@ -10,19 +10,23 @@ from app.models.tools import ToolExecutionRequest
 from app.services.llm_service import llm_service
 from app.services.tool_service import tool_service
 
-router = APIRouter(prefix="/agent", tags=["Autonomous SQL & Data AI Agent"])
+router = APIRouter(prefix="/agent", tags=["AI Data Analyst & Web Researcher Agent"])
 
 
 class AgentRunRequest(BaseModel):
     task_description: str = Field(
         ...,
-        description="Goal prompt for the autonomous SQL & Data AI Agent",
-        json_schema_extra={"example": "Generate top regional customer revenue query in Snowflake and translate to Postgres."},
+        description="Goal prompt for the AI Data Analyst & Web Researcher Agent",
+        json_schema_extra={"example": "Generate top revenue customer SQL query in Snowflake and research cloud data warehouse indexing best practices."},
     )
     model: str = Field(default="llama3-open-8b")
     document_payload: str = Field(
         default="",
         description="Optional uploaded CSV or document text for Q&A analysis",
+    )
+    enable_web_research: bool = Field(
+        default=True,
+        description="Combine internal documents with public web research",
     )
 
 
@@ -45,7 +49,7 @@ class AgentRunResponse(BaseModel):
 @router.post(
     "/run",
     response_model=AgentRunResponse,
-    summary="Execute autonomous SQL & Data AI Agent workflow (RBAC Protected)"
+    summary="Execute autonomous AI Data Analyst & Web Researcher workflow (RBAC Protected)"
 )
 async def run_autonomous_agent(
     request: AgentRunRequest,
@@ -62,59 +66,59 @@ async def run_autonomous_agent(
 
     steps: List[AgentStep] = []
 
-    # 1. Document / CSV Reader & Q&A Workflow
-    if doc_content or "csv" in task_lower or "pdf" in task_lower or "document" in task_lower or "file" in task_lower or "read" in task_lower:
+    # 1. AI Document + Web Researcher Workflow
+    if doc_content or request.enable_web_research or "search" in task_lower or "research" in task_lower or "web" in task_lower or "csv" in task_lower or "pdf" in task_lower or "document" in task_lower:
         payload_to_use = doc_content if doc_content else "id,customer_name,revenue,region\n101,Acme Corp,125000,US-East\n102,Globex,85000,US-West\n103,Soylent,210000,EU-Central"
         exec_res = tool_service.execute_tool(
             ToolExecutionRequest(
-                tool_name="pdf_csv_analyzer",
+                tool_name="pdf_csv_web_researcher",
                 arguments={
                     "document_content": payload_to_use,
                     "question": task,
-                    "file_type": "csv" if "," in payload_to_use.split("\n")[0] else "pdf"
+                    "enable_web_search": request.enable_web_research,
                 }
             )
         )
         steps.append(
             AgentStep(
                 step_number=1,
-                action="Document & CSV Analysis",
-                tool_name="pdf_csv_analyzer",
-                arguments={"document_content": payload_to_use[:100] + "...", "question": task},
+                action="AI Document & Web Research",
+                tool_name="pdf_csv_web_researcher",
+                arguments={"document_content": payload_to_use[:100] + "...", "question": task, "web_search": request.enable_web_research},
                 output=exec_res.result,
             )
         )
 
-    # 2. SQL AI Agent Query Generation, Translation & Plan Analysis
-    if "sql" in task_lower or "query" in task_lower or "postgres" in task_lower or "snowflake" in task_lower or "bigquery" in task_lower or "table" in task_lower:
-        sql_task_type = "generate"
+    # 2. AI Data Analyst & SQL Agent Workflow
+    if "sql" in task_lower or "query" in task_lower or "postgres" in task_lower or "snowflake" in task_lower or "bigquery" in task_lower or "calculate" in task_lower or "metric" in task_lower:
+        sql_task_type = "generate_sql"
         if "translate" in task_lower or "convert" in task_lower:
-            sql_task_type = "translate"
+            sql_task_type = "translate_sql"
         elif "explain" in task_lower or "plan" in task_lower or "optimize" in task_lower:
             sql_task_type = "explain_plan"
-        elif "ddl" in task_lower or "schema" in task_lower or "create" in task_lower:
-            sql_task_type = "generate_ddl"
+        elif "calculate" in task_lower or "metric" in task_lower:
+            sql_task_type = "calculate_metric"
 
         dialect = "snowflake" if "snowflake" in task_lower else ("bigquery" if "bigquery" in task_lower else "postgres")
 
         exec_res = tool_service.execute_tool(
             ToolExecutionRequest(
-                tool_name="sql_agent_tool",
-                arguments={"task": sql_task_type, "prompt_or_query": task, "dialect": dialect}
+                tool_name="sql_data_analyst_tool",
+                arguments={"task": sql_task_type, "query_or_prompt": task, "dialect": dialect}
             )
         )
         steps.append(
             AgentStep(
                 step_number=len(steps) + 1,
-                action=f"SQL Agent ({sql_task_type.title()})",
-                tool_name="sql_agent_tool",
-                arguments={"task": sql_task_type, "prompt_or_query": task, "dialect": dialect},
+                action=f"AI Data Analyst ({sql_task_type.title()})",
+                tool_name="sql_data_analyst_tool",
+                arguments={"task": sql_task_type, "query_or_prompt": task, "dialect": dialect},
                 output=exec_res.result,
             )
         )
 
-    # 3. JSON Schema Validation Workflow
-    if "json" in task_lower or "validate" in task_lower or "record" in task_lower:
+    # 3. Data Schema Validator Workflow
+    if "json" in task_lower or "validate" in task_lower or "schema" in task_lower:
         sample_json = '{"record_id": "rec-101", "user_email": "user@data.io", "amount": 250.50, "status": "ACTIVE"}'
         exec_res = tool_service.execute_tool(
             ToolExecutionRequest(
@@ -150,36 +154,17 @@ async def run_autonomous_agent(
             )
         )
 
-    # 5. Math Calculation Fallback
-    if not steps:
-        import re
-        if any(op in task for op in ["+", "*", "-", "/"]) and any(c.isdigit() for c in task):
-            math_match = re.search(r"[\d\s\+\-\*\/\(\)]+", task)
-            expr = math_match.group(0).strip() if math_match else "10 * 5"
-            exec_res = tool_service.execute_tool(
-                ToolExecutionRequest(tool_name="calculator", arguments={"expression": expr})
-            )
-            steps.append(
-                AgentStep(
-                    step_number=1,
-                    action="Math Formula Execution",
-                    tool_name="calculator",
-                    arguments={"expression": expr},
-                    output=exec_res.result,
-                )
-            )
-
-    # Synthesize Final LLM Completion based on Autonomous Agent Telemetry
+    # Synthesize Final LLM Completion based on Autonomous Telemetry & Web Sources
     findings_str = "\n".join([f"Step {s.step_number} [{s.action}]: Tool '{s.tool_name}' output: {s.output}" for s in steps])
 
     prompt_messages = [
         ChatMessage(
             role="system",
-            content="You are an Enterprise Autonomous SQL & Data AI Agent. Synthesize tool telemetry into a clean executive report.",
+            content="You are an Enterprise AI Data Analyst & Web Researcher Agent. Synthesize tool telemetry and web search findings into a structured executive report.",
         ),
         ChatMessage(
             role="user",
-            content=f"Task Goal: {task}\nCollected Autonomous Telemetry:\n{findings_str or 'No specific tool triggers fired.'}\nProvide final executive summary and technical recommendations.",
+            content=f"Task Goal: {task}\nCollected Telemetry & Web Knowledge:\n{findings_str or 'No specific tool triggers fired.'}\nProvide final synthesis.",
         ),
     ]
 
